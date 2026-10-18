@@ -342,6 +342,14 @@ function gameLayerMoveNextRow() {
 }
 
 function gameTapEvent(e) {
+     // 👇 加上这段防抖逻辑，限制 30 毫秒内只能点一次
+    let now = Date.now();
+    if (now - lastTapTime < 30) {
+        return false; 
+    }
+    lastTapTime = now;
+    // 👆 防抖逻辑结束
+    
     if (_gameOver) {
         return false;
     }
