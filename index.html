@@ -674,6 +674,51 @@
 #GameLayerBG.flash {
     animation: m3-flash 0.4s ease 3;
 }
+/* ================= 强制修复按钮被旧代码覆盖的问题 ================= */
+
+/* 1. 强制覆盖所有按钮的形状和焦点框（去蓝框） */
+#welcome .btn, 
+#welcome .m3-btn,
+#ready-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 48px !important;
+    padding: 0 24px !important;
+    border-radius: 999px !important; /* 强制变成 M3 全圆角胶囊 */
+    font-family: inherit !important;
+    font-size: 1rem !important;
+    font-weight: 500 !important;
+    border: none !important; /* 移除边框 */
+    outline: none !important; /* 移除点击时的蓝色外框 */
+    transition: transform 0.1s ease, box-shadow 0.2s ease !important;
+    box-shadow: none;
+}
+
+/* 点击时缩小的交互动效 */
+#welcome .btn:active,
+#welcome .m3-btn:active {
+    transform: scale(0.96);
+}
+
+/* 2. 修复“点击开始”按钮（因为被 js 强制改成了 btn-primary） */
+#ready-btn,
+#welcome .btn-primary {
+    background-color: var(--md-primary) !important;
+    color: var(--md-on-primary) !important;
+    box-shadow: var(--md-elev-1) !important;
+}
+
+#ready-btn:hover,
+#welcome .btn-primary:hover {
+    box-shadow: var(--md-elev-2) !important;
+}
+
+/* 3. 修复“游戏设置”和“BUG刷新”按钮（它们原本是 btn-secondary） */
+#welcome .btn-secondary {
+    background-color: var(--md-secondary-container) !important;
+    color: var(--md-on-secondary-container) !important;
+}
     </style>
 
     <script src="https://pv.sohu.com/cityjson?ie=utf-8"></script>
