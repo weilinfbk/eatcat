@@ -604,56 +604,74 @@
                 animation-duration: .01ms !important;
             }
         }
-        /* ================= 游戏内画面（Material 3） ================= */
-/* 1. 游戏背景底框 */
+        /* ================= 游戏内画面（Material 3 高级定制版） ================= */
+
+/* 1. 游戏背景：加入顶部环境光和 M3 暗色渐变，不再是死气沉沉的黑 */
 #GameLayerBG {
-    background-color: var(--md-surface); /* 使用 M3 暗色背景 */
-    /* 如果之前有背景色，这里会被覆盖 */
+    background: radial-gradient(circle at 50% 0%, #2B2930 0%, #141218 80%);
 }
 
-/* 2. 游戏网格方块 */
+/* 2. 游戏网格方块：做成半透明的玻璃卡片质感 */
 .block {
-    background-color: var(--md-surface-container-low); /* 方块底色改成深灰 */
-    /* 使用内阴影代替原来的边框，防止增加元素尺寸导致排版错位 */
-    box-shadow: inset 0 0 0 1px var(--md-outline-variant); 
-    border-radius: 2px; /* 略微圆角，更柔和 */
-    transition: background-color 0.2s ease;
+    /* 极弱的透明白，让底部的光透上来 */
+    background-color: rgba(255, 255, 255, 0.015) !important; 
+    /* 极细的紫色发光内边框，代替生硬的黑线 */
+    box-shadow: inset 0 0 0 1px rgba(208, 188, 255, 0.08) !important;
+    border-radius: 4px !important;
 }
 
-/* 点击后方块变暗（原版是变白） */
-.block.tt1, .block.tt2, .block.tt3, .block.tt4, .block.tt5, .block.tt6, .block.tt7, .block.tt8, .block.tt9 {
-    background-color: var(--md-surface-container-highest) !important;
-    box-shadow: inset 0 0 0 1px var(--md-primary);
+/* 利用原本代码的 .bl 类，让偶数轨道比奇数轨道稍微亮一点（增加音游的轨道纵深感） */
+.block.bl {
+    background-color: rgba(255, 255, 255, 0.04) !important;
+    box-shadow: inset 0 0 0 1px rgba(208, 188, 255, 0.15) !important;
+}
+
+/* 玩家点击后的方块：变成 M3 主色微光 */
+.block[class*="tt"] {
+    background-color: rgba(208, 188, 255, 0.2) !important;
+    box-shadow: inset 0 0 0 2px var(--md-primary) !important;
 }
 
 /* 点错时的方块（闪红） */
 .block.bad {
     background-color: var(--md-error) !important;
-    box-shadow: inset 0 0 0 1px var(--md-on-error);
+    box-shadow: inset 0 0 0 2px var(--md-on-error) !important;
 }
 
-/* 3. 剩余时间文字 */
+/* 3. 剩余时间：改成 Material 3 的悬浮胶囊样式（居中、带毛玻璃） */
 #GameTimeLayer {
-    color: var(--md-primary); /* 使用 M3 主色（紫色） */
+    top: 8%; 
+    left: 0;
+    right: 0;
+    margin: 0 auto; /* 强制水平居中 */
+    width: fit-content !important;
+    padding: 10px 28px;
+    
+    /* 毛玻璃背景和边框 */
+    background-color: rgba(33, 31, 38, 0.65) !important;
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(208, 188, 255, 0.2);
+    border-radius: 999px; /* 胶囊圆角 */
+    
+    /* 文字样式 */
+    color: var(--md-primary);
     font-family: 'Roboto', 'Noto Sans SC', sans-serif;
-    font-size: 1.5rem;
-    font-weight: 500;
-    letter-spacing: 0.05em;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6); /* 增加一点发光阴影，防止在图片上看不清 */
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
     text-align: center;
-    width: 100%;
-    top: 10%; /* 调整时间显示的垂直位置，可根据喜好修改 */
-    pointer-events: none; /* 防止时间文字挡住点击事件 */
+    pointer-events: none; /* 防止挡住点击 */
     z-index: 10;
 }
 
-/* 时间到了闪烁的动画效果保留，但颜色改一下 */
+/* 时间到了的闪烁动画 */
 @keyframes m3-flash {
-    0%, 100% { background-color: var(--md-surface); }
-    50% { background-color: var(--md-surface-container-high); }
+    0%, 100% { background-color: rgba(33, 31, 38, 0.65); }
+    50% { background-color: var(--md-error); color: var(--md-on-error); border-color: var(--md-error); }
 }
 #GameLayerBG.flash {
-    animation: m3-flash 0.5s ease 3;
+    animation: m3-flash 0.4s ease 3;
 }
     </style>
 
