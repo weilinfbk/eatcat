@@ -763,6 +763,32 @@
     transform: translate3d(0, 0, 0); /* 强制启用 GPU 硬件加速 */
     perspective: 1000px;
 }
+/* ================= 修复滑条和页面溢出 ================= */
+html, body {
+    overflow: hidden !important; /* 禁止页面任何滑动 */
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    touch-action: none; /* 防止浏览器的触摸手势干扰游戏 */
+}
+
+/* 确保欢迎卡片在屏幕较小时也不会超出导致被截断 */
+#welcome .FILL {
+    overflow-y: auto !important; /* 只允许在卡片内部滚动 */
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* 确保游戏背景绝对铺满屏幕 */
+#GameLayerBG {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+}
     </style>
 
     <script src="https://pv.sohu.com/cityjson?ie=utf-8"></script>
