@@ -731,8 +731,20 @@ function autoset(asss) {
 function showImg(input) {
     var file = input.files[0];
     url = window.URL.createObjectURL(file);
-}
 
+    // 立即把当前画面上已有的方块背景换成新图
+    if (typeof GameLayer !== 'undefined') {
+        for (var i = 0; i < GameLayer.length; i++) {
+            var children = GameLayer[i].children;
+            for (var j = 0; j < children.length; j++) {
+                if (children[j].notEmpty) {
+                    children[j].style.backgroundImage = "url(" + url + ")";
+                }
+            }
+        }
+    }
+    console.log('已选择图片，blob URL:', url);
+}
 function stair() {
     key = [];
     for (var i = 1; i < __k; ++i) {
