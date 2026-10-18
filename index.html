@@ -755,6 +755,14 @@
 #welcome .m3-chip:hover {
     background-color: rgba(230, 224, 233, 0.08) !important;
 }
+/* ================= 解决快速点击闪屏 ================= */
+.GameLayer {
+    will-change: transform; /* 告诉浏览器提前准备动画 */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translate3d(0, 0, 0); /* 强制启用 GPU 硬件加速 */
+    perspective: 1000px;
+}
     </style>
 
     <script src="https://pv.sohu.com/cityjson?ie=utf-8"></script>
