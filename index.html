@@ -604,6 +604,57 @@
                 animation-duration: .01ms !important;
             }
         }
+        /* ================= 游戏内画面（Material 3） ================= */
+/* 1. 游戏背景底框 */
+#GameLayerBG {
+    background-color: var(--md-surface); /* 使用 M3 暗色背景 */
+    /* 如果之前有背景色，这里会被覆盖 */
+}
+
+/* 2. 游戏网格方块 */
+.block {
+    background-color: var(--md-surface-container-low); /* 方块底色改成深灰 */
+    /* 使用内阴影代替原来的边框，防止增加元素尺寸导致排版错位 */
+    box-shadow: inset 0 0 0 1px var(--md-outline-variant); 
+    border-radius: 2px; /* 略微圆角，更柔和 */
+    transition: background-color 0.2s ease;
+}
+
+/* 点击后方块变暗（原版是变白） */
+.block.tt1, .block.tt2, .block.tt3, .block.tt4, .block.tt5, .block.tt6, .block.tt7, .block.tt8, .block.tt9 {
+    background-color: var(--md-surface-container-highest) !important;
+    box-shadow: inset 0 0 0 1px var(--md-primary);
+}
+
+/* 点错时的方块（闪红） */
+.block.bad {
+    background-color: var(--md-error) !important;
+    box-shadow: inset 0 0 0 1px var(--md-on-error);
+}
+
+/* 3. 剩余时间文字 */
+#GameTimeLayer {
+    color: var(--md-primary); /* 使用 M3 主色（紫色） */
+    font-family: 'Roboto', 'Noto Sans SC', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6); /* 增加一点发光阴影，防止在图片上看不清 */
+    text-align: center;
+    width: 100%;
+    top: 10%; /* 调整时间显示的垂直位置，可根据喜好修改 */
+    pointer-events: none; /* 防止时间文字挡住点击事件 */
+    z-index: 10;
+}
+
+/* 时间到了闪烁的动画效果保留，但颜色改一下 */
+@keyframes m3-flash {
+    0%, 100% { background-color: var(--md-surface); }
+    50% { background-color: var(--md-surface-container-high); }
+}
+#GameLayerBG.flash {
+    animation: m3-flash 0.5s ease 3;
+}
     </style>
 
     <script src="https://pv.sohu.com/cityjson?ie=utf-8"></script>
