@@ -645,7 +645,7 @@
     right: 0;
     margin: 0 auto; /* 强制水平居中 */
     width: fit-content !important;
-    padding: 10px 28px;
+    padding: 12px 32px; /* 稍微加大了一点内边距 */
     
     /* 毛玻璃背景和边框 */
     background-color: rgba(33, 31, 38, 0.65) !important;
@@ -654,16 +654,17 @@
     border: 1px solid rgba(208, 188, 255, 0.2);
     border-radius: 999px; /* 胶囊圆角 */
     
-    /* 文字样式 */
-    color: var(--md-primary);
+    /* 文字样式 👇 */
+    color: #FFFFFF; /* 改成纯白色，与深色背景完美融合 */
     font-family: 'Roboto', 'Noto Sans SC', sans-serif;
-    font-size: 1.25rem;
+    font-size: 1.75rem; /* 👈 字体放大了（原来 1.25rem） */
     font-weight: 700;
     letter-spacing: 0.1em;
     text-align: center;
     pointer-events: none; /* 防止挡住点击 */
     z-index: 10;
-}
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* 加一点阴影让白字更立体 */
+        }
 
 /* 时间到了的闪烁动画 */
 @keyframes m3-flash {
