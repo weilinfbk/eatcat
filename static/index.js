@@ -198,7 +198,7 @@ function gameOver() {
 function gameTime() {
     _gameTimeNum--;
     if (_gameTimeNum <= 0) {
-        GameTimeLayer.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;时间到！';
+        GameTimeLayer.innerHTML = isEnSystem ? '&nbsp;&nbsp;&nbsp;&nbsp;Time\'s Up!' : '&nbsp;&nbsp;&nbsp;&nbsp;时间到！';
         gameOver();
         GameLayerBG.className += ' flash';
         if (!_close) {
