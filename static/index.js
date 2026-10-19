@@ -1,3 +1,4 @@
+const isEnSystem = navigator.language.toLowerCase().includes('en');
 let isDesktop = navigator['userAgent'].match(/(ipad|iphone|ipod|android|windows phone)/i) ? false : true;
 let fontunit = isDesktop ? 20 : ((window.innerWidth > window.innerHeight ? window.innerHeight : window.innerWidth) / 320) * 10;
 document.write('<style type="text/css">' +
