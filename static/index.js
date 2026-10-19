@@ -449,13 +449,20 @@ function backBtn() {
 }
 
 function shareText(score) {
-
     deviation_time = (date2.getTime() - _date1.getTime())
-    if (score <= 2.5 * __Time) return '加油！我相信您可以的！';
-    if (score <= 5 * __Time) return '^_^ 加把劲，底力大王就是您！';
-    if (score <= 7.5 * __Time) return '您！';
-    if (score <= 10 * __Time) return '太 您 了！';
-    return '您是外星人嘛？';
+    if (isEnSystem) {
+        if (score <= 2.5 * __Time) return 'Keep going! I believe in you!';
+        if (score <= 5 * __Time) return '^_^ Try harder, you are the Stamina King!';
+        if (score <= 7.5 * __Time) return 'PRO!';
+        if (score <= 10 * __Time) return 'G O D!';
+        return 'Are you an alien?';
+    } else {
+        if (score <= 2.5 * __Time) return '加油！我相信您可以的！';
+        if (score <= 5 * __Time) return '^_^ 加把劲，底力大王就是您！';
+        if (score <= 7.5 * __Time) return '您！';
+        if (score <= 10 * __Time) return '太 您 了！';
+        return '您是外星人嘛？';
+    }
 }
 
 function toStr(obj) {
