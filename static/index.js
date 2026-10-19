@@ -17,6 +17,9 @@ let _close = false;
 let _fsj = false;
 var url = './static/image/ClickBefore.png';
 
+// 防抖变量
+let lastTapTime = 0;
+
 function isplaying() {
     return document.getElementById('welcome').style.display == 'none' &&
         document.getElementById('GameScoreLayer').style.display == 'none' &&
@@ -187,6 +190,8 @@ let date2 = new Date();
 
 function gameOver() {
     date2 = new Date();
+    // 修复 NaN 的 Bug：如果没有开始时间，就强行赋个值
+    if (!_date1) { _date1 = date2; } 
     _gameOver = true;
     clearInterval(_gameTime);
     setTimeout(function () {
@@ -343,6 +348,13 @@ function gameLayerMoveNextRow() {
 }
 
 function gameTapEvent(e) {   
+    // 防抖，限制 30 毫秒内只能点一次
+    let now = Date.now();
+    if (now - lastTapTime < 30) {
+        return false; 
+    }
+    lastTapTime = now;
+
     if (_gameOver) {
         return false;
     }
@@ -410,37 +422,43 @@ function showGameScoreLayer() {
     let l = document.getElementById('GameScoreLayer');
     let c = document.getElementById(_gameBBList[_gameBBListIndex - 1].id).className.match(_ttreg)[1];
     l.className = l.className.replace(/bgc\d/, 'bgc' + c);
+    
+    // 评语
     document.getElementById('GameScoreLayer-text').innerHTML = hide ? '' : "<span style='color:red;'>" + shareText(_gameScore) + "</span>";
+    
+    // 得分详情
     let score_text = '';
-if (isEnSystem) {
-    // 英文
-    score_text = 'You survived ';
-    score_text += "<span style='color:red;'>" + (deviation_time / 1000).toFixed(2) + "</span>" + ' seconds!<br>Your score is ';
-    score_text += "<span style='color:red;'>" + _gameScore + "</span>";
-    score_text += '<br>You clicked ';
-    score_text += "<span style='color:red;'>" + (_gameScore * 1000 / deviation_time).toFixed(2);
-    score_text += "</span>" + ' times per second on average!';
-    score_text += "<br>Equivalent to <span style='color:red;'>" + (_gameScore * 15000 / deviation_time).toFixed(2) + "</span> BPM 16th notes!"
-} else {
-    // 中文的
-    let score_text = '您坚持了 ';
-    score_text += "<span style='color:red;'>" + (deviation_time / 1000).toFixed(2) + "</span>" + ' 秒哦！<br>您的得分为 ';
-    score_text += "<span style='color:red;'>" + _gameScore + "</span>";
-    score_text += '<br>您平均每秒点击了 ';
-    score_text += "<span style='color:red;'>" + (_gameScore * 1000 / deviation_time).toFixed(2);
-    score_text += "</span>" + ' 次哦！';
-    score_text += "<br>相当于 <span style='color:red;'>" + (_gameScore * 15000 / deviation_time).toFixed(2) + "</span> BPM 下的十六分音符哦！"
-    document.getElementById('GameScoreLayer-bast').innerHTML = (isEnSystem ? 'Best Score: ' : '历史最佳得分 ') + "<span style='color:red;'>" + bast + "</span>";
-let now = (isEnSystem ? 'Your custom pattern: ' : '您的自定义键型为：') + "<span style='color:red;'>" + key.join('') + "</span>";
+    if (isEnSystem) {
+        score_text = 'You survived ';
+        score_text += "<span style='color:red;'>" + (deviation_time / 1000).toFixed(2) + "</span>" + ' seconds!<br>Your score is ';
+        score_text += "<span style='color:red;'>" + _gameScore + "</span>";
+        score_text += '<br>You clicked ';
+        score_text += "<span style='color:red;'>" + (_gameScore * 1000 / deviation_time).toFixed(2);
+        score_text += "</span>" + ' times per second on average!';
+        score_text += "<br>Equivalent to <span style='color:red;'>" + (_gameScore * 15000 / deviation_time).toFixed(2) + "</span> BPM 16th notes!"
+    } else {
+        score_text = '您坚持了 ';
+        score_text += "<span style='color:red;'>" + (deviation_time / 1000).toFixed(2) + "</span>" + ' 秒哦！<br>您的得分为 ';
+        score_text += "<span style='color:red;'>" + _gameScore + "</span>";
+        score_text += '<br>您平均每秒点击了 ';
+        score_text += "<span style='color:red;'>" + (_gameScore * 1000 / deviation_time).toFixed(2);
+        score_text += "</span>" + ' 次哦！';
+        score_text += "<br>相当于 <span style='color:red;'>" + (_gameScore * 15000 / deviation_time).toFixed(2) + "</span> BPM 下的十六分音符哦！"
+    }
+    document.getElementById('GameScoreLayer-score').innerHTML = score_text;
+
+    // 历史最佳
+    let bast = cookie('bast-score');
     if (!bast || _gameScore > bast) {
         bast = _gameScore;
         cookie('bast-score', bast, 100);
     }
+    document.getElementById('GameScoreLayer-bast').innerHTML = (isEnSystem ? 'Best Score: ' : '历史最佳得分 ') + "<span style='color:red;'>" + bast + "</span>";
 
-    document.getElementById('GameScoreLayer-bast').innerHTML = '历史最佳得分 ' + "<span style='color:red;'>" + bast + "</span>";
-    let now = '您的自定义键型为：' + "<span style='color:red;'>" + key.join('')
-        + "</span>";
+    // 键型
+    let now = (isEnSystem ? 'Your custom pattern: ' : '您的自定义键型为：') + "<span style='color:red;'>" + key.join('') + "</span>";
     document.getElementById('now').innerHTML = now;
+    
     l.style.display = 'block';
 }
 
@@ -695,7 +713,6 @@ function click(index) {
 
     let fakeEvent = {
         clientX: ((index - 1) * blockSize + index * blockSize) / 2 + body.offsetLeft,
-        // Make sure that it is in the area
         clientY: (touchArea[0] + touchArea[1]) / 2,
         target: document.getElementById(id),
     };
@@ -705,8 +722,8 @@ function click(index) {
 
 function foreach() {
     var strCookie = document.cookie;
-    var arrCookie = strCookie.split("; "); // 将多cookie切割为多个名/值对
-    for (var i = 0; i < arrCookie.length; i++) { // 遍历cookie数组，处理每个cookie对
+    var arrCookie = strCookie.split("; "); 
+    for (var i = 0; i < arrCookie.length; i++) { 
         var arr = arrCookie[i].split("=");
         if (arr.length > 0)
             DelCookie(arr[0]);
@@ -765,6 +782,7 @@ function showImg(input) {
     }
     console.log('已选择图片，blob URL:', url);
 }
+
 function stair() {
     key = [];
     for (var i = 1; i < __k; ++i) {
