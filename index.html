@@ -973,7 +973,57 @@ html, body {
             </div>
         </div>
     </div>
+<script>
+    // 判断系统语言
+    const isEn = navigator.language.toLowerCase().includes('en');
 
+    // 如果系统是英文，自动替换界面的文字
+    if (isEn) {
+        document.title = "Eat the Cat";
+        document.getElementById('tt').innerText = "Eat the Cat (Highly Customizable~)";
+        document.getElementById('tttt').innerText = "Update: Vertical Judgement is now available!";
+        document.getElementById('ttt').innerHTML = "Start from the bottom cat.<br>See how many cats you can eat~<br>Note: There are many goodies in the settings!<br>PC players under default settings<br>Press DFJK keys on keyboard<br>to control the four lanes respectively!";
+        
+        document.getElementById('ready-btn').innerText = "Start Game";
+        
+        // 为了方便，这里我直接按按钮在页面里的顺序去修改文字
+        const btns = document.querySelectorAll('#welcome button');
+        btns.forEach(btn => {
+            const text = btn.innerText.trim();
+            if (text === '游戏设置') btn.innerText = 'Settings';
+            if (text.includes('若出现了')) btn.innerText = 'If bug occurs, click here to refresh';
+            if (text === '纯随机') btn.innerText = 'Pure Random';
+            if (text === '无纵连的随机') btn.innerText = 'Random (No Jacks)';
+            if (text === '短纵') btn.innerText = 'Short Jack';
+            if (text === '全纵连') btn.innerText = 'Full Jack';
+            if (text === '交互') btn.innerText = 'Trill';
+            if (text === '楼梯') btn.innerText = 'Staircase';
+            if (text === '三纵') btn.innerText = 'Triple Jack';
+            if (text === '完成') btn.innerText = 'Done';
+            if (text === '下一页') btn.innerText = 'Next';
+            if (text === '上一页') btn.innerText = 'Prev';
+            if (text === '重来') btn.innerText = 'Retry';
+            if (text === '返回主页') btn.innerText = 'Home';
+        });
+        
+        // 设置界面的文字替换（通过找输入框的 label）
+        const labels = document.querySelectorAll('#welcome label');
+        labels.forEach(label => {
+            const text = label.innerText;
+            if (text.includes('键数')) label.innerText = 'Lane Count';
+            if (text.includes('绑定按键')) label.innerText = 'Bind Keys';
+            if (text.includes('时间限制')) label.innerText = 'Time Limit (sec)';
+            if (text.includes('键型')) label.innerText = 'Pattern';
+        });
+        
+        // 结算界面的文字
+        document.getElementById('GameScoreLayer-score').innerText = "Score";
+        document.getElementById('GameScoreLayer-bast').innerText = "Best";
+        document.getElementById('now').innerText = "Pattern";
+        document.getElementById('nosw').innerText = "PC players press 'R' to restart";
+    }
+</script>
+    
 </body>
 
 </html>
