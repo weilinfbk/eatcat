@@ -210,7 +210,7 @@ function gameTime() {
 }
 
 function creatTimeText(n) {
-    return '&nbsp;剩余时间:' + n;
+    return isEnSystem ? '&nbsp;Time Left: ' + n : '&nbsp;剩余时间:' + n;
 }
 
 let _ttreg = / t{1,2}(\d+)/,
