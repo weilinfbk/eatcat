@@ -11,13 +11,12 @@
     <meta name="theme-color" content="#141218" />
     <link rel="icon" href="./eatcat/favicon.ico" type="image/x-icon" />
     <link rel="shortcut icon" href="./eatcat/favicon.ico" type="image/x-icon" />
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <link href="./static/index.css" rel="stylesheet" type="text/css">
 
     <!-- ================= Material 3 主题样式 ================= -->
     <style>
-/* ---------- M3 Design Tokens（暗色基线） ---------- */
+        /* ---------- M3 Design Tokens（暗色基线） ---------- */
         :root {
             --md-primary: #D0BCFF;
             --md-on-primary: #381E72;
@@ -59,9 +58,7 @@
         }
 
         /* ---------- 基础重置 ---------- */
-        *,
-        *::before,
-        *::after {
+        *, *::before, *::after {
             box-sizing: border-box;
         }
 
@@ -74,8 +71,7 @@
             min-height: 100vh;
             background-color: var(--md-surface);
             color: var(--md-on-surface);
-            font-family: 'Roboto', 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB',
-                'Microsoft YaHei', system-ui, -apple-system, sans-serif;
+            font-family: 'Roboto', 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
             font-size: 1rem;
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
@@ -87,12 +83,10 @@
             width: 6px;
             height: 6px;
         }
-
         ::-webkit-scrollbar-thumb {
             background: var(--md-outline-variant);
             border-radius: 999px;
         }
-
         ::-webkit-scrollbar-track {
             background: transparent;
         }
@@ -122,12 +116,10 @@
             isolation: isolate;
             -webkit-user-select: none;
             user-select: none;
-            transition: box-shadow .2s ease, background-color .2s ease,
-                border-color .2s ease, color .2s ease;
+            transition: box-shadow .2s ease, background-color .2s ease, border-color .2s ease, color .2s ease;
             outline: none;
         }
 
-        /* 状态层（hover / pressed） */
         .m3-btn::before {
             content: "";
             position: absolute;
@@ -138,64 +130,43 @@
             transition: opacity .15s ease;
             z-index: -1;
         }
-
-        .m3-btn:hover::before {
-            opacity: .08;
-        }
-
-        .m3-btn:active::before {
-            opacity: .12;
-        }
-
+        .m3-btn:hover::before { opacity: .08; }
+        .m3-btn:active::before { opacity: .12; }
         .m3-btn:focus-visible {
             outline: 3px solid var(--md-primary);
             outline-offset: 2px;
         }
-
         .m3-btn:disabled {
             opacity: .38;
             pointer-events: none;
         }
 
-        /* Filled */
+        /* 变体 */
         .m3-btn-filled {
             background-color: var(--md-primary);
             color: var(--md-on-primary);
             box-shadow: var(--md-elev-1);
         }
+        .m3-btn-filled::before { background: var(--md-on-primary); }
+        .m3-btn-filled:hover { box-shadow: var(--md-elev-2); }
 
-        .m3-btn-filled::before {
-            background: var(--md-on-primary);
-        }
-
-        .m3-btn-filled:hover {
-            box-shadow: var(--md-elev-2);
-        }
-
-        /* Tonal */
         .m3-btn-tonal {
             background-color: var(--md-secondary-container);
             color: var(--md-on-secondary-container);
         }
+        .m3-btn-tonal::before { background: var(--md-on-secondary-container); }
 
-        .m3-btn-tonal::before {
-            background: var(--md-on-secondary-container);
-        }
-
-        /* Outlined */
         .m3-btn-outlined {
             background-color: transparent;
             color: var(--md-primary);
             border: 1px solid var(--md-outline);
         }
 
-        /* Text */
         .m3-btn-text {
             padding: 0 16px;
             color: var(--md-primary);
         }
 
-        /* 尺寸修饰 */
         .m3-btn-lg {
             min-height: 56px;
             padding: 0 32px;
@@ -207,15 +178,13 @@
             width: 100%;
         }
 
-        /* 按钮行 */
         .m3-btn-group {
             display: flex;
             flex-wrap: wrap;
             gap: 12px;
             margin: 24px 0 12px;
         }
-
-        .m3-btn-group>.m3-btn {
+        .m3-btn-group > .m3-btn {
             flex: 1 1 auto;
             min-width: 132px;
         }
@@ -226,7 +195,6 @@
             gap: 8px;
             margin-top: 8px;
         }
-
         .m3-btn-row-end {
             justify-content: flex-end;
         }
@@ -260,19 +228,12 @@
             -webkit-user-select: none;
             user-select: none;
         }
-
         .m3-chip:hover {
             background-color: rgba(230, 224, 233, .08);
             border-color: var(--md-outline);
         }
-
         .m3-chip:active {
             background-color: rgba(230, 224, 233, .14);
-        }
-
-        .m3-chip:focus-visible {
-            outline: 3px solid var(--md-primary);
-            outline-offset: 2px;
         }
 
         /* ---------- 文本框（Filled TextField） ---------- */
@@ -280,7 +241,6 @@
             position: relative;
             margin: 0 0 20px;
         }
-
         .m3-textfield input {
             width: 100%;
             height: 56px;
@@ -296,17 +256,12 @@
             outline: none;
             transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease;
         }
-
-        .m3-textfield input:hover {
-            background-color: #3E3B44;
-        }
-
+        .m3-textfield input:hover { background-color: #3E3B44; }
         .m3-textfield input:focus {
             border-bottom-color: var(--md-primary);
             box-shadow: inset 0 -1px 0 0 var(--md-primary);
             background-color: #3E3B44;
         }
-
         .m3-textfield label {
             position: absolute;
             left: 16px;
@@ -314,18 +269,14 @@
             color: var(--md-on-surface-variant);
             font-size: 1rem;
             pointer-events: none;
-            transition: top .15s cubic-bezier(.2, 0, 0, 1),
-                font-size .15s cubic-bezier(.2, 0, 0, 1),
-                color .15s ease;
+            transition: top .15s cubic-bezier(.2, 0, 0, 1), font-size .15s cubic-bezier(.2, 0, 0, 1), color .15s ease;
         }
-
-        .m3-textfield input:focus+label,
-        .m3-textfield input:not(:placeholder-shown)+label {
+        .m3-textfield input:focus + label,
+        .m3-textfield input:not(:placeholder-shown) + label {
             top: 7px;
             font-size: .75rem;
         }
-
-        .m3-textfield input:focus+label {
+        .m3-textfield input:focus + label {
             color: var(--md-primary);
         }
 
@@ -339,26 +290,22 @@
             cursor: pointer;
             -webkit-tap-highlight-color: transparent;
         }
-
         .m3-row-text {
             display: flex;
             flex-direction: column;
             gap: 2px;
             min-width: 0;
         }
-
         .m3-row-title {
             font-size: .9375rem;
             font-weight: 500;
             color: var(--md-on-surface);
         }
-
         .m3-row-sub {
             font-size: .75rem;
             color: var(--md-on-surface-variant);
             line-height: 1.4;
         }
-
         .m3-switch {
             position: relative;
             flex: 0 0 auto;
@@ -366,7 +313,6 @@
             width: 52px;
             height: 32px;
         }
-
         .m3-switch input {
             position: absolute;
             inset: 0;
@@ -377,7 +323,6 @@
             cursor: pointer;
             z-index: 2;
         }
-
         .m3-switch-track {
             position: relative;
             width: 52px;
@@ -387,7 +332,6 @@
             border: 2px solid var(--md-outline);
             transition: background-color .2s ease, border-color .2s ease;
         }
-
         .m3-switch-thumb {
             position: absolute;
             top: 50%;
@@ -397,31 +341,21 @@
             border-radius: 50%;
             background-color: var(--md-outline);
             transform: translateY(-50%);
-            transition: left .2s cubic-bezier(.2, 0, 0, 1), width .2s cubic-bezier(.2, 0, 0, 1),
-                height .2s cubic-bezier(.2, 0, 0, 1), background-color .2s ease;
+            transition: left .2s cubic-bezier(.2, 0, 0, 1), width .2s cubic-bezier(.2, 0, 0, 1), height .2s cubic-bezier(.2, 0, 0, 1), background-color .2s ease;
         }
-
-        .m3-switch input:checked+.m3-switch-track {
+        .m3-switch input:checked + .m3-switch-track {
             background-color: var(--md-primary);
             border-color: var(--md-primary);
         }
-
-        .m3-switch input:checked+.m3-switch-track .m3-switch-thumb {
+        .m3-switch input:checked + .m3-switch-track .m3-switch-thumb {
             left: 22px;
             width: 24px;
             height: 24px;
             background-color: var(--md-on-primary);
         }
 
-        .m3-switch input:focus-visible+.m3-switch-track {
-            outline: 3px solid var(--md-primary);
-            outline-offset: 2px;
-        }
-
         /* ---------- 文件上传 ---------- */
-        .m3-file-input {
-            display: none !important;
-        }
+        .m3-file-input { display: none !important; }
 
         /* ---------- 排版 ---------- */
         .m3-headline {
@@ -432,7 +366,6 @@
             letter-spacing: 0;
             color: var(--md-on-surface);
         }
-
         .m3-section-head {
             display: flex;
             align-items: baseline;
@@ -440,7 +373,6 @@
             gap: 12px;
             margin: 0 0 16px;
         }
-
         .m3-section-title {
             margin: 24px 0 12px;
             font-size: 1rem;
@@ -448,36 +380,22 @@
             letter-spacing: .01em;
             color: var(--md-primary);
         }
-
-        .m3-section-head .m3-section-title {
-            margin: 0;
-        }
-
+        .m3-section-head .m3-section-title { margin: 0; }
         .m3-step {
             font-size: .75rem;
             color: var(--md-on-surface-variant);
         }
-
         .m3-body {
             margin: 16px 0;
             font-size: .9375rem;
             line-height: 1.7;
             color: var(--md-on-surface-variant);
         }
-
-        .m3-support {
-            margin: 0 0 8px;
-            font-size: .8125rem;
-            line-height: 1.5;
-            color: var(--md-on-surface-variant);
-        }
-
         .m3-hint {
             margin: -4px 0 0;
             font-size: .8125rem;
             color: var(--md-on-surface-variant);
         }
-
         .m3-banner {
             margin: 20px 0 0;
             padding: 12px 16px;
@@ -487,7 +405,6 @@
             font-size: .875rem;
             line-height: 1.6;
         }
-
         .m3-link {
             display: inline-block;
             margin-top: 4px;
@@ -498,10 +415,7 @@
             text-decoration: none;
             border-radius: var(--md-shape-xs);
         }
-
-        .m3-link:hover {
-            text-decoration: underline;
-        }
+        .m3-link:hover { text-decoration: underline; }
 
         /* ---------- 欢迎卡片 ---------- */
         .m3-welcome-card {
@@ -518,7 +432,7 @@
         }
 
         /* ---------- 结算对话框 ---------- */
-        #GameScoreLayer>.m3-dialog {
+        #GameScoreLayer > .m3-dialog {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -532,7 +446,6 @@
             background-color: var(--md-surface-container-high);
             box-shadow: 0 8px 24px rgba(0, 0, 0, .5);
         }
-
         #GameScoreLayer-text {
             font-size: 1.375rem;
             font-weight: 500;
@@ -541,9 +454,7 @@
             text-align: center;
             margin-bottom: 8px;
         }
-
-        #GameScoreLayer-score,
-        #GameScoreLayer-bast {
+        #GameScoreLayer-score, #GameScoreLayer-bast {
             font-size: 1rem;
             line-height: 1.6;
             color: var(--md-on-surface);
@@ -553,20 +464,14 @@
             border-radius: var(--md-shape-md);
             background-color: var(--md-surface-container-highest);
         }
-
-        #now,
-        #nosw {
+        #now, #nosw {
             font-size: .8125rem;
             line-height: 1.6;
             color: var(--md-on-surface-variant);
             text-align: center;
             margin-top: 12px;
         }
-
-        #GameScoreLayer .m3-btn-row {
-            margin-top: 20px;
-        }
-
+        #GameScoreLayer .m3-btn-row { margin-top: 20px; }
         #GameScoreLayer .m3-btn-row .m3-btn {
             flex: 1 1 0;
             min-width: 0;
@@ -575,220 +480,150 @@
 
         /* ---------- 响应式 ---------- */
         @media (max-width: 380px) {
-            .m3-headline {
-                font-size: 1.375rem;
-            }
-
-            .m3-welcome-card {
-                padding: 24px 16px 28px;
-            }
-
-            .m3-btn-group>.m3-btn {
-                min-width: 0;
-            }
+            .m3-headline { font-size: 1.375rem; }
+            .m3-welcome-card { padding: 24px 16px 28px; }
+            .m3-btn-group > .m3-btn { min-width: 0; }
         }
 
-        @media (min-width: 768px) {
-            .m3-headline {
-                font-size: 1.875rem;
-            }
-        }
-
-        /* 减弱动效偏好 */
-        @media (prefers-reduced-motion: reduce) {
-
-            *,
-            *::before,
-            *::after {
-                transition-duration: .01ms !important;
-                animation-duration: .01ms !important;
-            }
-        }
         /* ================= 游戏内画面（Material 3 高级定制版） ================= */
-
-/* 1. 游戏背景：加入顶部环境光和 M3 暗色渐变，不再是死气沉沉的黑 */
-#GameLayerBG {
-    background: radial-gradient(circle at 50% 0%, #2B2930 0%, #141218 80%);
-}
-
-/* 2. 游戏网格方块：做成半透明的玻璃卡片质感 */
-.block {
-    /* 极弱的透明白，让底部的光透上来 */
-    background-color: rgba(255, 255, 255, 0.015) !important; 
-    /* 极细的紫色发光内边框，代替生硬的黑线 */
-    box-shadow: inset 0 0 0 1px rgba(208, 188, 255, 0.08) !important;
-    border-radius: 4px !important;
-}
-
-/* 利用原本代码的 .bl 类，让偶数轨道比奇数轨道稍微亮一点（增加音游的轨道纵深感） */
-.block.bl {
-    background-color: rgba(255, 255, 255, 0.04) !important;
-    box-shadow: inset 0 0 0 1px rgba(208, 188, 255, 0.15) !important;
-}
-
-/* 玩家点击后的方块：变成 M3 主色微光 */
-.block[class*="tt"] {
-    background-color: rgba(208, 188, 255, 0.2) !important;
-    box-shadow: inset 0 0 0 2px var(--md-primary) !important;
-}
-
-/* 点错时的方块（闪红） */
-.block.bad {
-    background-color: var(--md-error) !important;
-    box-shadow: inset 0 0 0 2px var(--md-on-error) !important;
-}
-
-/* 3. 剩余时间：改成 Material 3 的悬浮胶囊样式（居中、带毛玻璃） */
-#GameTimeLayer {
-    top: 8%; 
-    left: 0;
-    right: 0;
-    margin: 0 auto; /* 强制水平居中 */
-    width: fit-content !important;
-    padding: 12px 32px; /* 稍微加大了一点内边距 */
-    
-    /* 毛玻璃背景和边框 */
-    background-color: rgba(33, 31, 38, 0.65) !important;
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(208, 188, 255, 0.2);
-    border-radius: 999px; /* 胶囊圆角 */
-    
-    /* 文字样式 👇 */
-    color: #FFFFFF; /* 改成纯白色，与深色背景完美融合 */
-    font-family: 'Roboto', 'Noto Sans SC', sans-serif;
-    font-size: 1.75rem; /* 👈 字体放大了（原来 1.25rem） */
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-align: center;
-    pointer-events: none; /* 防止挡住点击 */
-    z-index: 10;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* 加一点阴影让白字更立体 */
+        #GameLayerBG {
+            background: radial-gradient(circle at 50% 0%, #2B2930 0%, #141218 80%);
         }
 
-/* 时间到了的闪烁动画 */
-@keyframes m3-flash {
-    0%, 100% { background-color: rgba(33, 31, 38, 0.65); }
-    50% { background-color: var(--md-error); color: var(--md-on-error); border-color: var(--md-error); }
-}
-#GameLayerBG.flash {
-    animation: m3-flash 0.4s ease 3;
-}
-/* ================= 强制修复按钮被旧代码覆盖的问题 ================= */
+        .block {
+            background-color: rgba(255, 255, 255, 0.015) !important; 
+            box-shadow: inset 0 0 0 1px rgba(208, 188, 255, 0.08) !important;
+            border-radius: 4px !important;
+        }
 
-/* 1. 强制覆盖所有按钮的形状和焦点框（去蓝框） */
-#welcome .btn, 
-#welcome .m3-btn,
-#ready-btn {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    min-height: 48px !important;
-    padding: 0 24px !important;
-    border-radius: 999px !important; /* 强制变成 M3 全圆角胶囊 */
-    font-family: inherit !important;
-    font-size: 1rem !important;
-    font-weight: 500 !important;
-    border: none !important; /* 移除边框 */
-    outline: none !important; /* 移除点击时的蓝色外框 */
-    transition: transform 0.1s ease, box-shadow 0.2s ease !important;
-    box-shadow: none;
-}
+        .block.bl {
+            background-color: rgba(255, 255, 255, 0.04) !important;
+            box-shadow: inset 0 0 0 1px rgba(208, 188, 255, 0.15) !important;
+        }
 
-/* 点击时缩小的交互动效 */
-#welcome .btn:active,
-#welcome .m3-btn:active {
-    transform: scale(0.96);
-}
+        .block[class*="tt"] {
+            background-color: rgba(208, 188, 255, 0.2) !important;
+            box-shadow: inset 0 0 0 2px var(--md-primary) !important;
+        }
 
-/* 2. 修复“点击开始”按钮（因为被 js 强制改成了 btn-primary） */
-#ready-btn,
-#welcome .btn-primary {
-    background-color: var(--md-primary) !important;
-    color: var(--md-on-primary) !important;
-    box-shadow: var(--md-elev-1) !important;
-}
+        .block.bad {
+            background-color: var(--md-error) !important;
+            box-shadow: inset 0 0 0 2px var(--md-on-error) !important;
+        }
 
-#ready-btn:hover,
-#welcome .btn-primary:hover {
-    box-shadow: var(--md-elev-2) !important;
-}
+        #GameTimeLayer {
+            top: 8%; left: 0; right: 0; margin: 0 auto;
+            width: fit-content !important;
+            padding: 12px 32px;
+            background-color: rgba(33, 31, 38, 0.65) !important;
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(208, 188, 255, 0.2);
+            border-radius: 999px;
+            color: #FFFFFF;
+            font-family: 'Roboto', 'Noto Sans SC', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-align: center;
+            pointer-events: none;
+            z-index: 10;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
 
-/* 3. 修复“游戏设置”和“BUG刷新”按钮（它们原本是 btn-secondary） */
-#welcome .btn-secondary {
-    background-color: var(--md-secondary-container) !important;
-    color: var(--md-on-secondary-container) !important;
-}
-/* ================= 修复BUG按钮和键型按钮的样式 ================= */
+        @keyframes m3-flash {
+            0%, 100% { background-color: rgba(33, 31, 38, 0.65); }
+            50% { background-color: var(--md-error); color: var(--md-on-error); border-color: var(--md-error); }
+        }
+        #GameLayerBG.flash { animation: m3-flash 0.4s ease 3; }
 
-/* 1. 修复“BUG刷新”按钮（恢复 M3 的描边胶囊样式） */
-#welcome .m3-btn-outlined {
-    background-color: transparent !important;
-    color: var(--md-primary) !important;
-    border: 1px solid var(--md-outline) !important;
-    border-radius: 999px !important;
-    width: 100% !important;
-    margin-top: 8px !important;
-    margin-bottom: 24px !important;
-    padding: 12px 24px !important;
-    font-size: 1rem !important;
-    font-weight: 500 !important;
-    display: flex !important;
-}
+        /* ================= 强制修复按钮和页面溢出 ================= */
+        #welcome .btn, #welcome .m3-btn, #ready-btn {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            min-height: 48px !important;
+            padding: 0 24px !important;
+            border-radius: 999px !important;
+            font-family: inherit !important;
+            font-size: 1rem !important;
+            font-weight: 500 !important;
+            border: none !important;
+            outline: none !important;
+            transition: transform 0.1s ease, box-shadow 0.2s ease !important;
+            box-shadow: none;
+        }
 
-/* 2. 修复下面那一排“一键设置键型”的按钮（Chip 样式） */
-#welcome .m3-chip {
-    background-color: transparent !important;
-    color: var(--md-on-surface-variant) !important;
-    border: 1px solid var(--md-outline-variant) !important;
-    border-radius: 8px !important; /* M3 芯片是小圆角 */
-    min-height: 40px !important;
-    padding: 0 16px !important;
-    font-size: 0.875rem !important;
-    font-weight: 500 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    box-shadow: none !important;
-}
+        #welcome .btn:active, #welcome .m3-btn:active { transform: scale(0.96); }
 
-#welcome .m3-chip:hover {
-    background-color: rgba(230, 224, 233, 0.08) !important;
-}
-/* ================= 解决快速点击闪屏 ================= */
-.GameLayer {
-    will-change: transform; /* 告诉浏览器提前准备动画 */
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    transform: translate3d(0, 0, 0); /* 强制启用 GPU 硬件加速 */
-    perspective: 1000px;
-}
-/* ================= 修复滑条和页面溢出 ================= */
-html, body {
-    overflow: hidden !important; /* 禁止页面任何滑动 */
-    height: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    touch-action: none; /* 防止浏览器的触摸手势干扰游戏 */
-}
+        #ready-btn, #welcome .btn-primary {
+            background-color: var(--md-primary) !important;
+            color: var(--md-on-primary) !important;
+            box-shadow: var(--md-elev-1) !important;
+        }
+        #ready-btn:hover, #welcome .btn-primary:hover { box-shadow: var(--md-elev-2) !important; }
+        #welcome .btn-secondary {
+            background-color: var(--md-secondary-container) !important;
+            color: var(--md-on-secondary-container) !important;
+        }
 
-/* 确保欢迎卡片在屏幕较小时也不会超出导致被截断 */
-#welcome .FILL {
-    overflow-y: auto !important; /* 只允许在卡片内部滚动 */
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch;
-}
+        #welcome .m3-btn-outlined {
+            background-color: transparent !important;
+            color: var(--md-primary) !important;
+            border: 1px solid var(--md-outline) !important;
+            border-radius: 999px !important;
+            width: 100% !important;
+            margin-top: 8px !important;
+            margin-bottom: 24px !important;
+            padding: 12px 24px !important;
+            font-size: 1rem !important;
+            font-weight: 500 !important;
+            display: flex !important;
+        }
 
-/* 确保游戏背景绝对铺满屏幕 */
-#GameLayerBG {
-    position: absolute !important;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: 100vw !important;
-    height: 100vh !important;
-}
+        #welcome .m3-chip {
+            background-color: transparent !important;
+            color: var(--md-on-surface-variant) !important;
+            border: 1px solid var(--md-outline-variant) !important;
+            border-radius: 8px !important;
+            min-height: 40px !important;
+            padding: 0 16px !important;
+            font-size: 0.875rem !important;
+            font-weight: 500 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: none !important;
+        }
+        #welcome .m3-chip:hover { background-color: rgba(230, 224, 233, 0.08) !important; }
+
+        /* ================= 解决快速点击闪屏 & 页面溢出 ================= */
+        .GameLayer {
+            will-change: transform;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            transform: translate3d(0, 0, 0);
+            perspective: 1000px;
+        }
+
+        html, body {
+            overflow: hidden !important;
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            touch-action: none;
+        }
+        #welcome .FILL {
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            -webkit-overflow-scrolling: touch;
+        }
+        #GameLayerBG {
+            position: absolute !important;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100vw !important;
+            height: 100vh !important;
+        }
     </style>
 
     <script src="https://pv.sohu.com/cityjson?ie=utf-8"></script>
@@ -973,57 +808,76 @@ html, body {
             </div>
         </div>
     </div>
-<script>
-    // 判断系统语言
-    const isEn = navigator.language.toLowerCase().includes('en');
 
-    // 如果系统是英文，自动替换界面的文字
-    if (isEn) {
-        document.title = "Eat the Cat";
-        document.getElementById('tt').innerText = "Eat the Cat (Highly Customizable~)";
-        document.getElementById('tttt').innerText = "Update: Vertical Judgement is now available!";
-        document.getElementById('ttt').innerHTML = "Start from the bottom cat.<br>See how many cats you can eat~<br>Note: There are many goodies in the settings!<br>PC players under default settings<br>Press DFJK keys on keyboard<br>to control the four lanes respectively!";
-        
-        document.getElementById('ready-btn').innerText = "Start Game";
-        
-        // 为了方便，这里我直接按按钮在页面里的顺序去修改文字
-        const btns = document.querySelectorAll('#welcome button');
-        btns.forEach(btn => {
-            const text = btn.innerText.trim();
-            if (text === '游戏设置') btn.innerText = 'Settings';
-            if (text.includes('若出现了')) btn.innerText = 'If bug occurs, click here to refresh';
-            if (text === '纯随机') btn.innerText = 'Pure Random';
-            if (text === '无纵连的随机') btn.innerText = 'Random (No Jacks)';
-            if (text === '短纵') btn.innerText = 'Short Jack';
-            if (text === '全纵连') btn.innerText = 'Full Jack';
-            if (text === '交互') btn.innerText = 'Trill';
-            if (text === '楼梯') btn.innerText = 'Staircase';
-            if (text === '三纵') btn.innerText = 'Triple Jack';
-            if (text === '完成') btn.innerText = 'Done';
-            if (text === '下一页') btn.innerText = 'Next';
-            if (text === '上一页') btn.innerText = 'Prev';
-            if (text === '重来') btn.innerText = 'Retry';
-            if (text === '返回主页') btn.innerText = 'Home';
-        });
-        
-        // 设置界面的文字替换（通过找输入框的 label）
-        const labels = document.querySelectorAll('#welcome label');
-        labels.forEach(label => {
-            const text = label.innerText;
-            if (text.includes('键数')) label.innerText = 'Lane Count';
-            if (text.includes('绑定按键')) label.innerText = 'Bind Keys';
-            if (text.includes('时间限制')) label.innerText = 'Time Limit (sec)';
-            if (text.includes('键型')) label.innerText = 'Pattern';
-        });
-        
-        // 结算界面的文字
-        document.getElementById('GameScoreLayer-score').innerText = "Score";
-        document.getElementById('GameScoreLayer-bast').innerText = "Best";
-        document.getElementById('now').innerText = "Pattern";
-        document.getElementById('nosw').innerText = "PC players press 'R' to restart";
-    }
-</script>
-    
+    <!-- ================= 自动语言替换脚本 ================= -->
+    <script>
+        const isEn = navigator.language.toLowerCase().includes('en');
+        if (isEn) {
+            document.title = "Eat the Cat";
+            
+            // 主页标题与说明
+            document.getElementById('tt').innerText = "Eat the Cat (Highly Customizable~)";
+            document.getElementById('tttt').innerText = "Update: Vertical Judgement is now available!";
+            document.getElementById('ttt').innerHTML = "Start from the bottom cat.<br>See how many cats you can eat~<br>Note: There are many goodies in the settings!<br>PC players under default settings<br>Press DFJK keys on keyboard<br>to control the four lanes respectively!";
+            
+            // 主页按钮
+            document.getElementById('ready-btn').innerText = "Start Game";
+            
+            const btns = document.querySelectorAll('#welcome button');
+            btns.forEach(btn => {
+                const text = btn.innerText.trim();
+                if (text === '游戏设置') btn.innerText = 'Settings';
+                if (text.includes('若出现了')) btn.innerText = 'If bug occurs, click here to refresh';
+                if (text === '纯随机') btn.innerText = 'Pure Random';
+                if (text === '无纵连的随机') btn.innerText = 'Random (No Jacks)';
+                if (text === '短纵') btn.innerText = 'Short Jack';
+                if (text === '全纵连') btn.innerText = 'Full Jack';
+                if (text === '交互') btn.innerText = 'Trill';
+                if (text === '楼梯') btn.innerText = 'Staircase';
+                if (text === '三纵') btn.innerText = 'Triple Jack';
+                if (text === '完成') btn.innerText = 'Done';
+                if (text === '下一页') btn.innerText = 'Next';
+                if (text === '上一页') btn.innerText = 'Prev';
+                if (text === '重来') btn.innerText = 'Retry';
+                if (text === '返回主页') btn.innerText = 'Home';
+            });
+            
+            // 设置界面的文字替换（小标题、标签等）
+            document.querySelector('label[for="k"]').innerText = "Lane Count (2~8)";
+            document.querySelector('label[for="keyboard"]').innerText = "Bind Keys (e.g., dfjk)";
+            document.querySelector('label[for="timeinput"]').innerText = "Time Limit (sec)";
+            document.querySelector('label[for="note"]').innerText = "Pattern";
+            
+            // 切换 M3 输入框的浮动标签
+            const labels = document.querySelectorAll('#welcome label');
+            labels.forEach(label => {
+                const text = label.innerText;
+                if (text.includes('键数')) label.innerText = 'Lane Count';
+                if (text.includes('绑定按键')) label.innerText = 'Bind Keys';
+                if (text.includes('时间限制')) label.innerText = 'Time Limit';
+                if (text.includes('键型')) label.innerText = 'Pattern';
+                if (text.includes('关闭音效')) label.innerText = 'Mute Sound';
+                if (text.includes('隐藏结算评语')) label.innerText = 'Hide Result Comments';
+                if (text.includes('开启垂直判定')) label.innerText = 'Enable Vertical Judgement';
+                if (text.includes('选择图片')) label.innerText = 'Choose Image';
+                if (text.includes('基础设置')) label.innerText = 'Basic Settings';
+                if (text.includes('游玩偏好')) label.innerText = 'Preferences';
+                if (text.includes('一键设置特殊键型')) label.innerText = 'Quick Setup Special Patterns';
+                if (text.includes('若按键全部消失')) label.innerText = 'If notes disappear, please refresh';
+                if (text.includes('请填写与键数')) label.innerText = 'Fill in English letters equal to lane count. Default 4K is DFJK.';
+                if (text.includes('键型设置有改动')) label.innerText = 'Pattern settings updated, check the docs.';
+                if (text.includes('打开键型说明文档')) label.innerText = 'Open Pattern Documentation →';
+                if (text.includes('自定义按键图片')) label.innerText = 'Custom Note Image';
+                if (text.includes('支持 GIF')) label.innerText = 'Supports GIF / PNG / JPG / WebP';
+            });
+
+            // 结算界面标题
+            document.getElementById('GameScoreLayer-score').innerText = "Score";
+            document.getElementById('GameScoreLayer-bast').innerText = "Best";
+            document.getElementById('now').innerText = "Pattern";
+            document.getElementById('nosw').innerText = "PC players press 'R' to restart";
+        }
+    </script>
 </body>
 
 </html>
