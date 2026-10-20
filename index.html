@@ -813,71 +813,79 @@
     <script>
         const isEn = navigator.language.toLowerCase().includes('en');
         if (isEn) {
-            document.title = "Eat the Cat";
-            
-            // 主页标题与说明
-            document.getElementById('tt').innerText = "Eat the Cat (Highly Customizable~)";
-            document.getElementById('tttt').innerText = "Update: Vertical Judgement is now available!";
-            document.getElementById('ttt').innerHTML = "Start from the bottom cat.<br>See how many cats you can eat~<br>Note: There are many goodies in the settings!<br>PC players under default settings<br>Press DFJK keys on keyboard<br>to control the four lanes respectively!";
-            
-            // 主页按钮
-            document.getElementById('ready-btn').innerText = "Start Game";
-            
-            const btns = document.querySelectorAll('#welcome button');
-            btns.forEach(btn => {
-                const text = btn.innerText.trim();
-                if (text === '游戏设置') btn.innerText = 'Settings';
-                if (text.includes('若出现了')) btn.innerText = 'If bug occurs, click here to refresh';
-                if (text === '纯随机') btn.innerText = 'Pure Random';
-                if (text === '无纵连的随机') btn.innerText = 'Random (No Jacks)';
-                if (text === '短纵') btn.innerText = 'Short Jack';
-                if (text === '全纵连') btn.innerText = 'Full Jack';
-                if (text === '交互') btn.innerText = 'Trill';
-                if (text === '楼梯') btn.innerText = 'Staircase';
-                if (text === '三纵') btn.innerText = 'Triple Jack';
-                if (text === '完成') btn.innerText = 'Done';
-                if (text === '下一页') btn.innerText = 'Next';
-                if (text === '上一页') btn.innerText = 'Prev';
-                if (text === '重来') btn.innerText = 'Retry';
-                if (text === '返回主页') btn.innerText = 'Home';
-            });
-            
-            // 设置界面的文字替换（小标题、标签等）
-            document.querySelector('label[for="k"]').innerText = "Lane Count (2~8)";
-            document.querySelector('label[for="keyboard"]').innerText = "Bind Keys (e.g., dfjk)";
-            document.querySelector('label[for="timeinput"]').innerText = "Time Limit (sec)";
-            document.querySelector('label[for="note"]').innerText = "Pattern";
-            
-            // 切换 M3 输入框的浮动标签
-            const labels = document.querySelectorAll('#welcome label');
-            labels.forEach(label => {
-                const text = label.innerText;
-                if (text.includes('键数')) label.innerText = 'Lane Count';
-                if (text.includes('绑定按键')) label.innerText = 'Bind Keys';
-                if (text.includes('时间限制')) label.innerText = 'Time Limit';
-                if (text.includes('键型')) label.innerText = 'Pattern';
-                if (text.includes('关闭音效')) label.innerText = 'Mute Sound';
-                if (text.includes('隐藏结算评语')) label.innerText = 'Hide Result Comments';
-                if (text.includes('开启垂直判定')) label.innerText = 'Enable Vertical Judgement';
-                if (text.includes('选择图片')) label.innerText = 'Choose Image';
-                if (text.includes('基础设置')) label.innerText = 'Basic Settings';
-                if (text.includes('游玩偏好')) label.innerText = 'Preferences';
-                if (text.includes('一键设置特殊键型')) label.innerText = 'Quick Setup Special Patterns';
-                if (text.includes('若按键全部消失')) label.innerText = 'If notes disappear, please refresh';
-                if (text.includes('请填写与键数')) label.innerText = 'Fill in English letters equal to lane count. Default 4K is DFJK.';
-                if (text.includes('键型设置有改动')) label.innerText = 'Pattern settings updated, check the docs.';
-                if (text.includes('打开键型说明文档')) label.innerText = 'Open Pattern Documentation →';
-                if (text.includes('自定义按键图片')) label.innerText = 'Custom Note Image';
-                if (text.includes('支持 GIF')) label.innerText = 'Supports GIF / PNG / JPG / WebP';
-            });
+            try {
+                document.title = "Eat the Cat";
+                
+                // 主页标题与说明
+                if (document.getElementById('tt')) document.getElementById('tt').innerText = "Eat the Cat (Highly Customizable~)";
+                if (document.getElementById('tttt')) document.getElementById('tttt').innerText = "Update: Vertical Judgement is now available!";
+                if (document.getElementById('ttt')) document.getElementById('ttt').innerHTML = "Start from the bottom cat.<br>See how many cats you can eat~<br>Note: There are many goodies in the settings!<br>PC players under default settings<br>Press DFJK keys on keyboard<br>to control the four lanes respectively!";
+                
+                // 主页按钮
+                if (document.getElementById('ready-btn')) document.getElementById('ready-btn').innerText = "Start Game";
+                
+                // 遍历所有按钮进行翻译
+                document.querySelectorAll('#welcome button').forEach(btn => {
+                    const text = btn.innerText.trim();
+                    if (text.includes('游戏设置')) btn.innerText = 'Settings';
+                    if (text.includes('若出现了')) btn.innerText = 'If bug occurs, click here to refresh';
+                    if (text === '纯随机') btn.innerText = 'Pure Random';
+                    if (text === '无纵连的随机') btn.innerText = 'Random (No Jacks)';
+                    if (text === '短纵') btn.innerText = 'Short Jack';
+                    if (text === '全纵连') btn.innerText = 'Full Jack';
+                    if (text === '交互') btn.innerText = 'Trill';
+                    if (text === '楼梯') btn.innerText = 'Staircase';
+                    if (text === '三纵') btn.innerText = 'Triple Jack';
+                    if (text === '完成') btn.innerText = 'Done';
+                    if (text === '下一页') btn.innerText = 'Next';
+                    if (text === '上一页') btn.innerText = 'Prev';
+                    if (text === '重来') btn.innerText = 'Retry';
+                    if (text === '返回主页') btn.innerText = 'Home';
+                });
 
-            // 结算界面标题
-            document.getElementById('GameScoreLayer-score').innerText = "Score";
-            document.getElementById('GameScoreLayer-bast').innerText = "Best";
-            document.getElementById('now').innerText = "Pattern";
-            document.getElementById('nosw').innerText = "PC players press 'R' to restart";
+                // 补全图1中没翻译的标题和小字
+                document.querySelectorAll('#welcome h2').forEach(h2 => {
+                    if (h2.innerText.includes('一键设置特殊键型')) h2.innerText = 'Quick Setup Special Patterns';
+                    if (h2.innerText.includes('基础设置')) h2.innerText = 'Basic Settings';
+                    if (h2.innerText.includes('游玩偏好')) h2.innerText = 'Preferences';
+                    if (h2.innerText.includes('自定义按键图片')) h2.innerText = 'Custom Note Image';
+                });
+
+                document.querySelectorAll('#welcome p').forEach(p => {
+                    if (p.innerText.includes('若按键全部消失')) p.innerText = 'If notes disappear, please refresh';
+                    if (p.innerText.includes('请填写与键数')) p.innerText = 'Fill in English letters equal to lane count. Default 4K is DFJK.';
+                    if (p.innerText.includes('键型设置有改动')) p.innerText = 'Pattern settings updated, check the docs.';
+                });
+
+                document.querySelectorAll('#welcome a').forEach(a => {
+                    if (a.innerText.includes('打开键型说明文档')) a.innerText = 'Open Pattern Documentation →';
+                });
+
+                // 翻译输入框的浮动标签
+                document.querySelectorAll('#welcome label').forEach(label => {
+                    const text = label.innerText;
+                    if (text.includes('键数')) label.innerText = 'Lane Count';
+                    if (text.includes('绑定按键')) label.innerText = 'Bind Keys';
+                    if (text.includes('时间限制')) label.innerText = 'Time Limit';
+                    if (text.includes('键型')) label.innerText = 'Pattern';
+                    if (text.includes('关闭音效')) label.innerText = 'Mute Sound';
+                    if (text.includes('隐藏结算评语')) label.innerText = 'Hide Result Comments';
+                    if (text.includes('开启垂直判定')) label.innerText = 'Enable Vertical Judgement';
+                    if (text.includes('选择图片')) label.innerText = 'Choose Image';
+                });
+                
+                // 结算界面的文字
+                if (document.getElementById('GameScoreLayer-score')) document.getElementById('GameScoreLayer-score').innerText = "Score";
+                if (document.getElementById('GameScoreLayer-bast')) document.getElementById('GameScoreLayer-bast').innerText = "Best";
+                if (document.getElementById('now')) document.getElementById('now').innerText = "Pattern";
+                if (document.getElementById('nosw')) document.getElementById('nosw').innerText = "PC players press 'R' to restart";
+
+            } catch (error) {
+                console.error("翻译脚本报错，但这不会影响游戏运行: ", error);
+            }
         }
     </script>
+</body>
 </body>
 
 </html>
