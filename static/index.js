@@ -1,9 +1,9 @@
 // 强制清理旧缓存
-if (!localStorage.getItem('eatcat_v2')) {
+if (!localStorage.getItem('eatcat_v3')) {
     document.cookie.split(";").forEach(function(c) { 
         document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
     });
-    localStorage.setItem('eatcat_v2', 'ok');
+    localStorage.setItem('eatcat_v3', 'ok');
 }
 
 const isEnSystem = navigator.language.toLowerCase().includes('en');
@@ -24,8 +24,6 @@ let __k = 4;
 let _close = false;
 let _fsj = false;
 var url = './static/image/ClickBefore.png';
-
-let lastTapTime = 0;
 
 function isplaying() {
     return document.getElementById('welcome').style.display == 'none' &&
@@ -76,11 +74,29 @@ function init() {
     GameLayer.push(document.getElementById('GameLayer2'));
     GameLayer[1].children = GameLayer[1].querySelectorAll('div');
     GameLayerBG = document.getElementById('GameLayerBG');
+    
+    // 【核心修复】重写触摸监听，支持多指同时按下
     if (GameLayerBG.ontouchstart === null) {
-        GameLayerBG.ontouchstart = gameTapEvent;
+        GameLayerBG.addEventListener('touchstart', function(e) {
+            e.preventDefault(); // 阻止屏幕缩放和滚动
+            // 遍历所有按下的手指
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                let touch = e.changedTouches[i];
+                let elem = document.elementFromPoint(touch.clientX, touch.clientY);
+                if (elem) {
+                    let fakeEvent = {
+                        target: elem,
+                        clientX: touch.clientX,
+                        clientY: touch.clientY
+                    };
+                    gameTapEvent(fakeEvent);
+                }
+            }
+        }, { passive: false });
     } else {
         GameLayerBG.onmousedown = gameTapEvent;
     }
+
     gameInit();
     initSetting();
     window.addEventListener('resize', refreshSize, false);
@@ -190,7 +206,7 @@ function Randomfrom(Min, Max) {
     return Min + Math.round(Rand * Range);
 }
 
-// 纯粹的原版单键位置生成（完全没改动）
+// 纯粹的原版单键位置生成（没改动）
 function randomPos() {
     let x = 0;
     if (key[last] == '!') {
@@ -238,7 +254,7 @@ function randomPos() {
     return x;
 }
 
-// ================= 核心分离：单键走原版，多压走专用铺满 =================
+// 多压模式专用生成（不走原版）
 function refreshGameLayer(box, loop, offset) {
     let currentKey = key[last];
     let isChordMode = (currentKey === 'D' || currentKey === 'T' || currentKey === 'A');
@@ -248,7 +264,6 @@ function refreshGameLayer(box, loop, offset) {
         let startRow = loop ? 0 : 1;
         let totalRows = Math.floor(box.children.length / __k);
         
-        // 先清空所有方块
         for (let j = 0; j < box.children.length; j++) {
             let r = box.children[j], rstyle = r.style;
             rstyle.left = (j % __k) * blockSize + 'px';
@@ -260,7 +275,6 @@ function refreshGameLayer(box, loop, offset) {
             r.notEmpty = false;
         }
 
-        // 逐行填满
         for (let row = startRow; row < totalRows; row++) {
             let posArray = [];
             let pCount = 2;
@@ -287,7 +301,7 @@ function refreshGameLayer(box, loop, offset) {
             });
         }
     } else {
-        // 【原版单键模式铺满】完全照抄旧版逻辑
+        // 【原版单键模式铺满】
         let i = randomPos() + (loop ? 0 : __k);
         for (let j = 0; j < box.children.length; j++) {
             let r = box.children[j], rstyle = r.style;
@@ -339,27 +353,54 @@ function gameLayerMoveNextRow() {
     }
 }
 
+// 【核心修复】完美支持多指点击的判定逻辑
 function gameTapEvent(e) {
-    let now = Date.now();
-    if (now - lastTapTime < 30) return false;
-    lastTapTime = now;
-
     if (_gameOver) return false;
+    
     let tar = e.target;
-    let y = e.clientY || e.targetTouches[0].clientY,
-        x = (e.clientX || e.targetTouches[0].clientX) - body.offsetLeft,
-        p = _gameBBList[_gameBBListIndex];
-
-    if (!p) return false;
+    let y = e.clientY;
+    let x = e.clientX - body.offsetLeft;
+        
     if (!_fsj && (y > touchArea[0] || y < touchArea[1])) return false;
 
-    if (((p.id == tar.id || (_fsj && p.id % __k == tar.id % __k)) && tar.notEmpty) || (p.cell == 0 && x < blockSize) || (x > p.cell * blockSize && x < (p.cell + 1) * blockSize) || (p.cell == (__k - 1) && x > (__k - 1) * blockSize)) {
+    // 如果这个方块在之前已经被另一个手指点掉了，直接无视这次点击
+    if (!tar.notEmpty) {
+        return false;
+    }
+
+    let p = _gameBBList[_gameBBListIndex];
+    if (!p) return false;
+
+    let hitIndex = -1;
+
+    // 判定是否命中
+    if (((p.id == tar.id || (_fsj && p.id % __k == tar.id % __k))) || 
+        (p.cell == 0 && x < blockSize) || 
+        (x > p.cell * blockSize && x < (p.cell + 1) * blockSize) || 
+        (p.cell == (__k - 1) && x > (__k - 1) * blockSize)) {
+        hitIndex = _gameBBListIndex;
+    } 
+    // 多押判定
+    else if (p.chordGroup !== undefined) {
+        for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
+            if (_gameBBList[i].chordGroup === p.chordGroup) {
+                if (_gameBBList[i].id === tar.id) {
+                    hitIndex = i;
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+    }
+
+    if (hitIndex !== -1) {
         if (!_gameStart) gameStart();
         if (!_close) createjs.Sound.play("tap");
         
-        let groupToKill = p.chordGroup;
+        let groupToKill = _gameBBList[hitIndex].chordGroup;
         
-        // 如果是多压，自动连带消除同一组的按键（宽容判定）
+        // 连带消除同组
         do {
             let curP = _gameBBList[_gameBBListIndex];
             let curTar = document.getElementById(curP.id);
@@ -376,10 +417,13 @@ function gameTapEvent(e) {
         );
 
         gameLayerMoveNextRow();
-    } else if (_gameStart && !tar.notEmpty) {
-        if (!_close) createjs.Sound.play("err");
-        gameOver();
-        tar.className += ' bad';
+    } else {
+        // 点错
+        if (_gameStart) {
+            if (!_close) createjs.Sound.play("err");
+            gameOver();
+            tar.className += ' bad';
+        }
     }
     return false;
 }
