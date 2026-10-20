@@ -14,7 +14,10 @@ document.write('<style type="text/css">' +
     (isDesktop ? '#welcome,#GameTimeLayer,#GameLayerBG,#GameScoreLayer.SHADE{position: absolute;}' :
         '#welcome,#GameTimeLayer,#GameLayerBG,#GameScoreLayer.SHADE{position:fixed;}@media screen and (orientation:landscape) {#landscape {display: box; display: -webkit-box; display: -moz-box; display: -ms-flexbox;}}') +
     '#GameLayerBG { touch-action: none !important; -webkit-user-select: none !important; }' +
+    '.block.hit { opacity: 0.35; }' +
+    '.block.bad { background-color: #d33 !important; }' +
     '</style>');
+
 let map = { 'd': 1, 'f': 2, 'j': 3, 'k': 4 };
 let key = ['!'];
 let chs = ['@', '!', '#', '&', '+', '-', '%', '*', 'D', 'T', 'A'];
@@ -26,25 +29,33 @@ let _close = false;
 let _fsj = false;
 var url = './static/image/ClickBefore.png';
 
+// ===== 改动：谱面预生成缓冲，保证前方至少还有这么多未点击的方块 =====
+const LOOKAHEAD = 64;
+
 function isplaying() {
     return document.getElementById('welcome').style.display == 'none' &&
         document.getElementById('GameScoreLayer').style.display == 'none' &&
         document.getElementById("setting1").style.display == 'none';
 }
 
+// ===== 改动：修复 __k >= 10 时字符比较失效的问题 =====
 function gl() {
     let tmp = [];
-    len = key.length;
-    for (let i = 0; i < len; ++i) {
-        if (chs.includes(key[i]) || (key[i] >= '1' && key[i] <= __k.toString())) {
-            tmp.push(key[i]);
-        } else if (key[i] == '！') {
+    for (let i = 0; i < key.length; ++i) {
+        let ch = key[i];
+        if (chs.includes(ch)) {
+            tmp.push(ch);
+        } else if (ch >= '1' && ch <= '9') {
+            let n = parseInt(ch, 10);
+            if (n >= 1 && n <= Math.max(__k, 9)) tmp.push(ch);
+        } else if (ch == '！') {
             tmp.push('!');
         }
     }
     key = tmp;
     if (key.length == 0) key = ['!'];
     len = key.length;
+    last = 0;
 }
 
 if (isDesktop) {
@@ -63,10 +74,30 @@ if (isDesktop) {
 let body, blockSize, GameLayer = [], GameLayerBG, touchArea = [], GameTimeLayer;
 let transform, transitionDuration;
 
-// 优化后的多点触控
+// ===== 改动：改用 pointerdown，直接用 e.target，避免 elementFromPoint 强制布局 =====
+function bindEvents() {
+    GameLayerBG.onmousedown = null;
+    GameLayerBG.ontouchstart = null;
+    GameLayerBG.onpointerdown = null;
+    GameLayerBG.removeEventListener('touchstart', handleTouchStart);
+    GameLayerBG.removeEventListener('pointerdown', handlePointerDown);
+
+    if (window.PointerEvent) {
+        GameLayerBG.addEventListener('pointerdown', handlePointerDown, { passive: false });
+    } else if ('ontouchstart' in window) {
+        GameLayerBG.addEventListener('touchstart', handleTouchStart, { passive: false });
+    } else {
+        GameLayerBG.onmousedown = gameTapEvent;
+    }
+}
+
+function handlePointerDown(e) {
+    e.preventDefault();
+    gameTapEvent(e);
+}
+
 function handleTouchStart(e) {
-    e.preventDefault(); 
-    // 使用 requestAnimationFrame 保证渲染不阻塞
+    e.preventDefault();
     for (let i = 0; i < e.changedTouches.length; i++) {
         let touch = e.changedTouches[i];
         let elem = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -77,19 +108,6 @@ function handleTouchStart(e) {
                 clientY: touch.clientY
             });
         }
-    }
-}
-
-function bindEvents() {
-    GameLayerBG.ontouchstart = null;
-    GameLayerBG.onmousedown = null;
-    GameLayerBG.removeEventListener('touchstart', handleTouchStart);
-    GameLayerBG.removeEventListener('mousedown', gameTapEvent);
-
-    if ('ontouchstart' in window) {
-        GameLayerBG.addEventListener('touchstart', handleTouchStart, { passive: false });
-    } else {
-        GameLayerBG.onmousedown = gameTapEvent;
     }
 }
 
@@ -122,29 +140,12 @@ function refreshSize() {
 }
 let refreshSizeTime;
 
+// ===== 改动：resize 直接重开，避免原来的 y 计算错误造成错位 =====
 function _refreshSize() {
-    countBlockSize();
-    for (let i = 0; i < GameLayer.length; i++) {
-        let box = GameLayer[i];
-        for (let j = 0; j < box.children.length; j++) {
-            let r = box.children[j], rstyle = r.style;
-            rstyle.left = (j % __k) * blockSize + 'px';
-            rstyle.bottom = Math.floor(j / __k) * blockSize + 'px';
-            rstyle.width = blockSize + 'px';
-            rstyle.height = blockSize + 'px';
-        }
+    if (!_gameStart && !_gameOver) {
+        countBlockSize();
+        gameRestart();
     }
-    let f, a;
-    if (GameLayer[0].y > GameLayer[1].y) {
-        f = GameLayer[0]; a = GameLayer[1];
-    } else {
-        f = GameLayer[1]; a = GameLayer[0];
-    }
-    let y = ((_gameBBListIndex) % 10) * blockSize;
-    f.y = y;
-    f.style[transform] = 'translate3D(0,' + f.y + 'px,0)';
-    a.y = -blockSize * Math.floor(f.children.length / __k) + y;
-    a.style[transform] = 'translate3D(0,' + a.y + 'px,0)';
 }
 
 function countBlockSize() {
@@ -154,6 +155,7 @@ function countBlockSize() {
     touchArea[0] = window.innerHeight - blockSize * 0;
     touchArea[1] = window.innerHeight - blockSize * 3;
 }
+
 let _gameBBList = [], _gameBBListIndex = 0, _gameOver = false, _gameStart = false, _gameTime, _gameTimeNum, _gameScore, _date1, deviation_time;
 
 function gameInit() {
@@ -178,7 +180,6 @@ function gameRestart() {
             r.className = 'block' + (j % __k ? ' bl' : '');
             r.style.backgroundImage = "none";
             r.notEmpty = false;
-            r.removeAttribute('data-hit');
         }
     }
     
@@ -222,19 +223,18 @@ function creatTimeText(n) {
     return isEnSystem ? '&nbsp;Time Left: ' + n : '&nbsp;剩余时间:' + n;
 }
 
-let _ttreg = / t{1,2}(\d+)/, _clearttClsReg = / t{1,2}\d+| bad/;
+let _ttreg = / t{1,2}(\d+)/, _clearttClsReg = / t{1,2}\d+| bad| hit/;
 
 function Randomfrom(Min, Max) {
     let Range = Max - Min, Rand = Math.random();
     return Min + Math.round(Rand * Range);
 }
 
+// ===== 改动：randomPos 内部统一推进 last（D/T/A 由 refreshGameLayer 处理，不进这里）=====
 function randomPos() {
     let x = 0;
     if (key[last] == '!') {
         x = Math.floor(Math.random() * 1000) % __k;
-        let pos = last - 1;
-        if (pos == -1) pos = len - 1;
     } else if (key[last] == '@') {
         x = Math.floor(Math.random() * 1000) % __k;
         if (x == lkey) {
@@ -246,11 +246,11 @@ function randomPos() {
     } else if (key[last] == '&') {
         x = __k - 1 - lkey;
     } else if (key[last] == '+') {
-        let num = parseInt(key[last + 1]);
+        let num = parseInt(key[last + 1]) || 0;
         last++;
         x = (lkey + num) % __k;
     } else if (key[last] == '-') {
-        let num = parseInt(key[last + 1]);
+        let num = parseInt(key[last + 1]) || 0;
         last++;
         x = (lkey - num + __k) % __k;
     } else if (key[last] == '%') {
@@ -272,81 +272,76 @@ function randomPos() {
     if (isNaN(x) || x < 0 || x >= __k) x = 0;
     lkey = x;
     last++;
-    if (last == len) last = 0;
+    if (last >= len) last = 0;
     return x;
 }
 
+// ===== 改动：逐行判断 D/T/A，每行推进一次 last，修复谱面卡住 =====
 function refreshGameLayer(box, loop, offset) {
-    let currentKey = key[last];
-    let isChordMode = (currentKey === 'D' || currentKey === 'T' || currentKey === 'A');
+    let totalRows = Math.floor(box.children.length / __k);
+    let startRow = loop ? 0 : 1;
+    let baseGroup = loop ? 100 : 0;
 
-    if (isChordMode) {
-        let startRow = loop ? 0 : 1;
-        let totalRows = Math.floor(box.children.length / __k);
-        
-        for (let j = 0; j < box.children.length; j++) {
-            let r = box.children[j], rstyle = r.style;
-            rstyle.left = (j % __k) * blockSize + 'px';
-            rstyle.bottom = Math.floor(j / __k) * blockSize + 'px';
-            rstyle.width = blockSize + 'px';
-            rstyle.height = blockSize + 'px';
-            rstyle.backgroundImage = "none";
-            r.className = r.className.replace(_clearttClsReg, '');
-            r.notEmpty = false;
-            r.removeAttribute('data-hit');
-        }
+    // 清空层
+    for (let j = 0; j < box.children.length; j++) {
+        let r = box.children[j], rstyle = r.style;
+        rstyle.left = (j % __k) * blockSize + 'px';
+        rstyle.bottom = Math.floor(j / __k) * blockSize + 'px';
+        rstyle.width = blockSize + 'px';
+        rstyle.height = blockSize + 'px';
+        rstyle.backgroundImage = "none";
+        r.className = r.className.replace(_clearttClsReg, '');
+        r.notEmpty = false;
+    }
 
-        for (let row = startRow; row < totalRows; row++) {
-            let posArray = [];
+    // 逐行生成（每行推进一次 last）
+    for (let row = startRow; row < totalRows; row++) {
+        let currentKey = key[last];
+        let isChordMode = (currentKey === 'D' || currentKey === 'T' || currentKey === 'A');
+
+        if (isChordMode) {
             let pCount = 2;
             if (currentKey === 'T' && __k >= 3) pCount = 3;
             if (currentKey === 'A' && __k >= 4) pCount = __k;
+            pCount = Math.min(pCount, __k);
 
             let allCols = Array.from({length: __k}, (_, i) => i);
-            for(let i=0; i<pCount; i++) {
+            let posArray = [];
+            for (let i = 0; i < pCount; i++) {
                 let idx = Math.floor(Math.random() * allCols.length);
                 posArray.push(allCols.splice(idx, 1)[0]);
             }
-            posArray.sort((a,b)=>a-b);
 
             posArray.forEach(col => {
                 let targetJ = row * __k + col;
                 let r = box.children[targetJ];
-                if(r) {
-                    _gameBBList.push({ cell: col, id: r.id, hit: false, chordGroup: row + (loop ? 100 : 0) });
+                if (r) {
+                    _gameBBList.push({ cell: col, id: r.id, hit: false, chordGroup: baseGroup + row });
                     r.style.backgroundImage = "url(" + url + ")";
                     r.style.backgroundSize = 'cover';
                     r.className += ' t' + (Math.floor(Math.random() * 1000) % (__k + 1) + 1);
                     r.notEmpty = true;
                 }
             });
-        }
-    } else {
-        let i = randomPos() + (loop ? 0 : __k);
-        for (let j = 0; j < box.children.length; j++) {
-            let r = box.children[j], rstyle = r.style;
-            rstyle.left = (j % __k) * blockSize + 'px';
-            rstyle.bottom = Math.floor(j / __k) * blockSize + 'px';
-            rstyle.width = blockSize + 'px';
-            rstyle.height = blockSize + 'px';
-            rstyle.backgroundImage = "none";
-            r.className = r.className.replace(_clearttClsReg, '');
-            r.removeAttribute('data-hit');
-            if (i == j) {
-                _gameBBList.push({ cell: i % __k, id: r.id, hit: false, chordGroup: undefined });
-                rstyle.backgroundImage = "url(" + url + ")";
-                rstyle.backgroundSize = 'cover';
+
+            // ★ 关键修复：和弦行也必须推进 last，否则谱面卡死
+            last++;
+            if (last >= len) last = 0;
+        } else {
+            let x = randomPos();
+            let targetJ = row * __k + x;
+            let r = box.children[targetJ];
+            if (r) {
+                _gameBBList.push({ cell: x, id: r.id, hit: false, chordGroup: undefined });
+                r.style.backgroundImage = "url(" + url + ")";
+                r.style.backgroundSize = 'cover';
                 r.className += ' t' + (Math.floor(Math.random() * 1000) % (__k + 1) + 1);
                 r.notEmpty = true;
-                if (j < box.children.length - __k) {
-                    i = randomPos() + (Math.floor(j / __k) + 1) * __k;
-                }
-            } else {
-                r.notEmpty = false;
             }
         }
     }
 
+    // 定位
     if (loop) {
         box.style.webkitTransitionDuration = '0ms';
         box.style.display = 'none';
@@ -359,7 +354,8 @@ function refreshGameLayer(box, loop, offset) {
         box.y = 0;
         box.style[transform] = 'translate3D(0,' + box.y + 'px,0)';
     }
-    box.style[transitionDuration] = '180ms';
+    // ===== 改动：180ms → 80ms，视觉跟手，减少「数据到了但画面没到」的错位 =====
+    box.style[transitionDuration] = '80ms';
 }
 
 function gameLayerMoveNextRow() {
@@ -372,50 +368,57 @@ function gameLayerMoveNextRow() {
             g.style[transform] = 'translate3D(0,' + g.y + 'px,0)';
         }
     }
+    // ===== 改动：定期压缩 _gameBBList，避免长局内存无限增长 =====
+    if (_gameBBListIndex > 200) {
+        _gameBBList = _gameBBList.slice(_gameBBListIndex);
+        _gameBBListIndex = 0;
+    }
 }
 
+// ===== 改动：pad 0.15 → 0.30，data-hit 改数据层，谱面空时紧急补货 =====
 function gameTapEvent(e) {
     if (_gameOver) return false;
-    
+
     let tar = e.target;
     let y = e.clientY;
     let x = e.clientX - body.offsetLeft;
-    
+
     if (!tar) return false;
 
-    if (tar.getAttribute && tar.getAttribute('data-hit') === 'true') return false;
-
     let p = _gameBBList[_gameBBListIndex];
-    if (!p) return false;
+    if (!p) {
+        // 紧急补货：找当前在屏幕上方的层强制回收一次
+        let upper = GameLayer[0].y < GameLayer[1].y ? GameLayer[0] : GameLayer[1];
+        if (upper.y < 0) refreshGameLayer(upper, 1, -1);
+        p = _gameBBList[_gameBBListIndex];
+        if (!p) return false;
+    }
 
     let hitIndex = -1;
-
-    // 【核心修复：增加 X 轴的宽容判定范围】
-    // 把每一列的判定区左右各扩大 15%，防止手速太快按在两列中间的缝隙里导致吃音
-    let pad = blockSize * 0.15;
-    let targetLeft = p.cell * blockSize - pad;
-    let targetRight = (p.cell + 1) * blockSize + pad;
+    let pad = blockSize * 0.30;
 
     if (!_fsj) {
-        // 没开垂直判定：点在列宽容范围内就算命中
-        if (x >= targetLeft && x <= targetRight) {
-            hitIndex = _gameBBListIndex; 
+        // 横向宽容判定
+        if (x >= p.cell * blockSize - pad && x <= (p.cell + 1) * blockSize + pad) {
+            hitIndex = _gameBBListIndex;
         } else if (p.chordGroup !== undefined) {
             for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
                 let cur = _gameBBList[i];
                 if (cur.chordGroup !== p.chordGroup) break;
-                let cLeft = cur.cell * blockSize - pad;
-                let cRight = (cur.cell + 1) * blockSize + pad;
-                if (x >= cLeft && x <= cRight) { hitIndex = i; break; }
+                if (cur.hit) continue;
+                if (x >= cur.cell * blockSize - pad && x <= (cur.cell + 1) * blockSize + pad) {
+                    hitIndex = i; break;
+                }
             }
         }
     } else {
-        // 开了垂直判定：必须点中方块本身
+        // 垂直判定：必须点中方块本体
         if (tar.notEmpty) {
             if (p.chordGroup !== undefined) {
                 for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
                     let cur = _gameBBList[i];
                     if (cur.chordGroup !== p.chordGroup) break;
+                    if (cur.hit) continue;
                     if (cur.id == tar.id) { hitIndex = i; break; }
                 }
             } else {
@@ -427,18 +430,16 @@ function gameTapEvent(e) {
     if (hitIndex !== -1) {
         if (!_gameStart) gameStart();
         if (!_close) createjs.Sound.play("tap");
-        
-        if (tar.setAttribute) tar.setAttribute('data-hit', 'true');
 
         let curP = _gameBBList[hitIndex];
-        curP.hit = true; 
-        
+        if (curP.hit) return false;   // 防重复命中（数据层）
+        curP.hit = true;
+
         let curTar = document.getElementById(curP.id);
         if (curTar) {
             curTar.className = curTar.className.replace(_ttreg, ' tt$1');
             curTar.style.backgroundImage = "none";
             curTar.notEmpty = false;
-            curTar.setAttribute('data-hit', 'true');
         }
         _gameScore++;
 
@@ -447,10 +448,7 @@ function gameTapEvent(e) {
             for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
                 let cur = _gameBBList[i];
                 if (cur.chordGroup !== p.chordGroup) break;
-                if (!cur.hit) {
-                    allHit = false;
-                    break;
-                }
+                if (!cur.hit) { allHit = false; break; }
             }
         }
 
@@ -462,21 +460,18 @@ function gameTapEvent(e) {
         }
         return false;
     } else {
-        // 【红黄圈判定逻辑】：如果手指点在当前目标方块的上方，绝对不死
+        // 点在当前目标方块上方 → 宽容不死
         let currentCat = document.getElementById(p.id);
         if (currentCat) {
             let rect = currentCat.getBoundingClientRect();
-            if (y < rect.top) {
-                return false;
-            }
+            if (y < rect.top) return false;
         }
 
-        // 判定区内没点中，立刻死
-        if (!_gameStart) gameStart(); 
+        if (!_gameStart) gameStart();
         if (!_close) createjs.Sound.play("err");
         gameOver();
         if (tar.classList && tar.classList.contains('block')) {
-            tar.className += ' bad';
+            tar.classList.add('bad');
         }
         return false;
     }
@@ -508,31 +503,36 @@ function showWelcomeLayer() {
     l.style.display = 'block';
 }
 
+// ===== 改动：deviation_time 兜底 ≥1，避免未开局就死时除零 =====
 function showGameScoreLayer() {
     let l = document.getElementById('GameScoreLayer');
-    let lastId = _gameBBList[_gameBBListIndex - 1] ? _gameBBList[_gameBBListIndex - 1].id : _gameBBList[0].id;
-    let match = document.getElementById(lastId).className.match(_ttreg);
-    let c = match ? match[1] : 1;
+    let lastId = _gameBBList[_gameBBListIndex - 1] ? _gameBBList[_gameBBListIndex - 1].id : (_gameBBList[0] ? _gameBBList[0].id : null);
+    let c = 1;
+    if (lastId) {
+        let match = document.getElementById(lastId).className.match(_ttreg);
+        if (match) c = match[1];
+    }
     l.className = l.className.replace(/bgc\d/, 'bgc' + c);
     document.getElementById('GameScoreLayer-text').innerHTML = hide ? '' : "<span style='color:red;'>" + shareText(_gameScore) + "</span>";
-    
+
+    let dt = deviation_time > 0 ? deviation_time : 1;
     let score_text = '';
     if (isEnSystem) {
         score_text = 'You survived ';
-        score_text += "<span style='color:red;'>" + (deviation_time / 1000).toFixed(2) + "</span>" + ' seconds!<br>Your score is ';
+        score_text += "<span style='color:red;'>" + (dt / 1000).toFixed(2) + "</span>" + ' seconds!<br>Your score is ';
         score_text += "<span style='color:red;'>" + _gameScore + "</span>";
         score_text += '<br>You clicked ';
-        score_text += "<span style='color:red;'>" + (_gameScore * 1000 / deviation_time).toFixed(2);
+        score_text += "<span style='color:red;'>" + (_gameScore * 1000 / dt).toFixed(2);
         score_text += "</span>" + ' times per second on average!';
-        score_text += "<br>Equivalent to <span style='color:red;'>" + (_gameScore * 15000 / deviation_time).toFixed(2) + "</span> BPM 16th notes!";
+        score_text += "<br>Equivalent to <span style='color:red;'>" + (_gameScore * 15000 / dt).toFixed(2) + "</span> BPM 16th notes!";
     } else {
         score_text = '您坚持了 ';
-        score_text += "<span style='color:red;'>" + (deviation_time / 1000).toFixed(2) + "</span>" + ' 秒哦！<br>您的得分为 ';
+        score_text += "<span style='color:red;'>" + (dt / 1000).toFixed(2) + "</span>" + ' 秒哦！<br>您的得分为 ';
         score_text += "<span style='color:red;'>" + _gameScore + "</span>";
         score_text += '<br>您平均每秒点击了 ';
-        score_text += "<span style='color:red;'>" + (_gameScore * 1000 / deviation_time).toFixed(2);
+        score_text += "<span style='color:red;'>" + (_gameScore * 1000 / dt).toFixed(2);
         score_text += "</span>" + ' 次哦！';
-        score_text += "<br>相当于 <span style='color:red;'>" + (_gameScore * 15000 / deviation_time).toFixed(2) + "</span> BPM 下的十六分音符哦！";
+        score_text += "<br>相当于 <span style='color:red;'>" + (_gameScore * 15000 / dt).toFixed(2) + "</span> BPM 下的十六分音符哦！";
     }
     document.getElementById('GameScoreLayer-score').innerHTML = score_text;
 
@@ -564,7 +564,8 @@ function backBtn() {
 }
 
 function shareText(score) {
-    deviation_time = (date2.getTime() - _date1.getTime());
+    // ===== 改动：兜底 ≥1，避免 NaN =====
+    deviation_time = Math.max(1, date2.getTime() - (_date1 ? _date1.getTime() : date2.getTime()));
     if (isEnSystem) {
         if (score <= 2.5 * __Time) return 'Keep going! I believe in you!';
         if (score <= 5 * __Time) return '^_^ Try harder, you are the Stamina King!';
@@ -604,23 +605,29 @@ function cookie(name, value, time) {
 
 document.write(createGameLayer());
 
+// ===== 改动：抽出 rebuildGameLayer，initSetting 和 save_cookie 共用 =====
+function rebuildGameLayer() {
+    let el = document.getElementById('GameLayerBG'), fa = el.parentNode;
+    fa.removeChild(el);
+    fa.removeChild(GameTimeLayer);
+    fa.appendChild(parseElement(createGameLayer()));
+    fa.appendChild(parseElement("<div id = \"GameTimeLayer\"></div>"));
+    GameTimeLayer = document.getElementById("GameTimeLayer");
+    GameLayer = [];
+    GameLayer.push(document.getElementById('GameLayer1'));
+    GameLayer[0].children = GameLayer[0].querySelectorAll('div');
+    GameLayer.push(document.getElementById('GameLayer2'));
+    GameLayer[1].children = GameLayer[1].querySelectorAll('div');
+    GameLayerBG = document.getElementById('GameLayerBG');
+    bindEvents();
+}
+
 function initSetting() {
     if (cookie('k')) {
         let tsmp = parseInt(cookie('k'));
         if (tsmp != __k) {
             __k = tsmp;
-            var el = document.getElementById('GameLayerBG'), fa = el.parentNode;
-            fa.removeChild(el); fa.removeChild(GameTimeLayer);
-            fa.appendChild(parseElement(createGameLayer()));
-            fa.appendChild(parseElement("<div id = \"GameTimeLayer\"></div>"));
-            GameTimeLayer = document.getElementById("GameTimeLayer");
-            GameLayer = [];
-            GameLayer.push(document.getElementById('GameLayer1'));
-            GameLayer[0].children = GameLayer[0].querySelectorAll('div');
-            GameLayer.push(document.getElementById('GameLayer2'));
-            GameLayer[1].children = GameLayer[1].querySelectorAll('div');
-            GameLayerBG = document.getElementById('GameLayerBG');
-            bindEvents();
+            rebuildGameLayer();
         }
     }
     if (cookie('time')) {
@@ -695,18 +702,7 @@ function save_cookie() {
     let tsmp = parseInt(document.getElementById("k").value);
     if (tsmp != __k) {
         __k = tsmp;
-        var el = document.getElementById('GameLayerBG'), fa = el.parentNode;
-        fa.removeChild(el); fa.removeChild(GameTimeLayer);
-        fa.appendChild(parseElement(createGameLayer()));
-        fa.appendChild(parseElement("<div id = \"GameTimeLayer\"></div>"));
-        GameTimeLayer = document.getElementById("GameTimeLayer");
-        GameLayer = [];
-        GameLayer.push(document.getElementById('GameLayer1'));
-        GameLayer[0].children = GameLayer[0].querySelectorAll('div');
-        GameLayer.push(document.getElementById('GameLayer2'));
-        GameLayer[1].children = GameLayer[1].querySelectorAll('div');
-        GameLayerBG = document.getElementById('GameLayerBG');
-        bindEvents();
+        rebuildGameLayer();
     }
 
     map = {};
@@ -779,7 +775,7 @@ function GetCookie(name) {
 
 function autoset(asss) {
     key = asss.split('');
-    len = key.length;
+    gl();
     gameRestart();
 }
 
@@ -802,6 +798,6 @@ function stair() {
     key = [];
     for (var i = 1; i < __k; ++i) key.push(i.toString());
     for (var i = __k; i > 1; --i) key.push(i.toString());
-    len = (__k - 1) * 2;
+    gl();
     gameRestart();
 }
