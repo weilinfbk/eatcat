@@ -16,7 +16,7 @@ dynamicStyle.textContent = 'html,body {font-size:' + (fontunit < 30 ? fontunit :
     (isDesktop ? '#welcome,#GameTimeLayer,#GameLayerBG,#GameScoreLayer.SHADE{position: absolute;}' :
         '#welcome,#GameTimeLayer,#GameLayerBG,#GameScoreLayer.SHADE{position:fixed;}@media screen and (orientation:landscape) {#landscape {display: box; display: -webkit-box; display: -moz-box; display: -ms-flexbox;}}') +
     '#GameLayerBG { touch-action: none !important; -webkit-user-select: none !important; }' +
-    '.block.hit { opacity: 0.35; }' +
+    '.block, .block.bl { background-color: transparent !important; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05) !important; }' +
     '.block.bad { background-color: #d33 !important; }';
 document.head.appendChild(dynamicStyle);
 
@@ -185,23 +185,19 @@ function playErrorSound() {
     } catch (e) {}
 }
 
-// ===== 强制留下紫色印记 =====
+// 🌟 核心：强制让格子变紫
 function makePurple(el) {
     if (el && el.classList && el.classList.contains('block')) {
-        el.style.boxShadow = 'inset 0 0 0 3px #D0BCFF';
-        el.style.backgroundColor = 'rgba(208, 188, 255, 0.2)';
+        el.style.setProperty('background-color', '#D0BCFF', 'important');
+        el.style.setProperty('box-shadow', 'inset 0 0 0 3px #6750A4', 'important');
     }
 }
 
-// ===== 短暂点亮紫色反馈（用于点错/点空） =====
-function flashPurple(el) {
+// 🌟 核心：强制让格子变红（用于点错）
+function makeRed(el) {
     if (el && el.classList && el.classList.contains('block')) {
-        el.style.boxShadow = 'inset 0 0 0 3px #D0BCFF';
-        el.style.backgroundColor = 'rgba(208, 188, 255, 0.2)';
-        setTimeout(function() {
-            el.style.boxShadow = '';
-            el.style.backgroundColor = '';
-        }, 300);
+        el.style.setProperty('background-color', '#d33', 'important');
+        el.style.setProperty('box-shadow', 'inset 0 0 0 3px #ff0000', 'important');
     }
 }
 
@@ -223,8 +219,9 @@ function gameRestart() {
             let r = box.children[j];
             r.className = 'block' + (j % __k ? ' bl' : '');
             r.style.backgroundImage = "none";
-            r.style.boxShadow = "";
-            r.style.backgroundColor = "";
+            r.style.removeProperty('background-color');
+            r.style.removeProperty('box-shadow');
+            r.removeAttribute('data-hit');
             r.notEmpty = false;
         }
     }
@@ -335,8 +332,9 @@ function refreshGameLayer(box, loop, offset) {
         rstyle.backgroundImage = "none";
         r.className = r.className.replace(_clearttClsReg, '');
         r.notEmpty = false;
-        r.style.boxShadow = "";
-        r.style.backgroundColor = "";
+        r.style.removeProperty('background-color');
+        r.style.removeProperty('box-shadow');
+        r.removeAttribute('data-hit');
     }
 
     for (let row = startRow; row < totalRows; row++) {
@@ -472,15 +470,14 @@ function gameTapEvent(e) {
         curP.hit = true;
 
         let curTar = document.getElementById(curP.id);
-        // 🌟 核心修复：强效给被吃掉的猫猫上紫色印记
         if (curTar) {
+            curTar.setAttribute('data-hit', 'true');
             makePurple(curTar); 
             curTar.style.backgroundImage = "none";
             curTar.notEmpty = false;
         }
-        // 🌟 如果玩家因为宽容判定点歪了（比如点到了黄色圈的空地），那个格子也亮一下紫框！
-        if (tar && tar !== curTar) {
-            flashPurple(tar);
+        if (tar && tar !== curTar && tar.classList && tar.classList.contains('block')) {
+            makePurple(tar); // 如果因为宽容点空了，空地也直接变紫
         }
 
         _gameScore++;
@@ -502,20 +499,26 @@ function gameTapEvent(e) {
         }
         return false;
     } else {
-        let currentCat = document.getElementById(p.id);
-        if (currentCat) {
-            let rect = currentCat.getBoundingClientRect();
-            if (y < rect.top) {
-                flashPurple(tar);
-                return false;
-            }
-        }
-
+        // 🌟 只要没点中，直接判定 Miss，不去管是不是按早了
         if (!_gameStart) gameStart();
         playErrorSound();
         gameOver();
-        flashPurple(tar);
-        if (currentCat) currentCat.classList.add('bad');
+
+        // 1. 让真正该点的猫猫变红
+        let currentCat = document.getElementById(p.id);
+        if (currentCat) {
+            makeRed(currentCat);
+        }
+
+        // 2. 让你手指按到的那个空白格子也变红
+        // 因为有时候点在两个格子中间的缝里，target 可能是背景，所以通过坐标重新找一次
+        let clickedEl = document.elementFromPoint(x, y);
+        if (clickedEl && clickedEl.classList && clickedEl.classList.contains('block')) {
+            makeRed(clickedEl);
+        } else if (tar && tar.classList && tar.classList.contains('block')) {
+            makeRed(tar);
+        }
+
         return false;
     }
 }
