@@ -1,9 +1,9 @@
 // 强制清理旧缓存
-if (!localStorage.getItem('eatcat_v14')) {
+if (!localStorage.getItem('eatcat_v15')) {
     document.cookie.split(";").forEach(function(c) { 
         document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
     });
-    localStorage.setItem('eatcat_v14', 'ok');
+    localStorage.setItem('eatcat_v15', 'ok');
 }
 
 const isEnSystem = navigator.language.toLowerCase().includes('en');
@@ -63,8 +63,10 @@ if (isDesktop) {
 let body, blockSize, GameLayer = [], GameLayerBG, touchArea = [], GameTimeLayer;
 let transform, transitionDuration;
 
+// 优化后的多点触控
 function handleTouchStart(e) {
     e.preventDefault(); 
+    // 使用 requestAnimationFrame 保证渲染不阻塞
     for (let i = 0; i < e.changedTouches.length; i++) {
         let touch = e.changedTouches[i];
         let elem = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -387,22 +389,28 @@ function gameTapEvent(e) {
     if (!p) return false;
 
     let hitIndex = -1;
-    let clickedCol = -1;
-    if (x >= 0 && x < body.offsetWidth) {
-        clickedCol = Math.floor(x / blockSize);
-    }
+
+    // 【核心修复：增加 X 轴的宽容判定范围】
+    // 把每一列的判定区左右各扩大 15%，防止手速太快按在两列中间的缝隙里导致吃音
+    let pad = blockSize * 0.15;
+    let targetLeft = p.cell * blockSize - pad;
+    let targetRight = (p.cell + 1) * blockSize + pad;
 
     if (!_fsj) {
-        if (clickedCol === p.cell) {
+        // 没开垂直判定：点在列宽容范围内就算命中
+        if (x >= targetLeft && x <= targetRight) {
             hitIndex = _gameBBListIndex; 
         } else if (p.chordGroup !== undefined) {
             for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
                 let cur = _gameBBList[i];
                 if (cur.chordGroup !== p.chordGroup) break;
-                if (cur.cell == clickedCol) { hitIndex = i; break; }
+                let cLeft = cur.cell * blockSize - pad;
+                let cRight = (cur.cell + 1) * blockSize + pad;
+                if (x >= cLeft && x <= cRight) { hitIndex = i; break; }
             }
         }
     } else {
+        // 开了垂直判定：必须点中方块本身
         if (tar.notEmpty) {
             if (p.chordGroup !== undefined) {
                 for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
