@@ -13,7 +13,6 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <link href="./static/index.css" rel="stylesheet" type="text/css">
 
-    <!-- ================= Material 3 主题样式 ================= -->
     <style>
         /* ---------- M3 Design Tokens（暗色基线） ---------- */
         :root {
@@ -49,7 +48,9 @@
             --md-elev-3: 0 1px 3px rgba(0, 0, 0, .30), 0 4px 8px 3px rgba(0, 0, 0, .15);
         }
 
-        /* ---------- 跟随系统自动切换亮色模式 ---------- */
+        /* ========================================================= */
+        /* ============= 【核心修复】系统亮色模式强制覆盖 ============= */
+        /* ========================================================= */
         @media (prefers-color-scheme: light) {
             :root {
                 --md-primary: #6750A4;
@@ -75,39 +76,70 @@
                 --md-outline-variant: #CAC4D0;
             }
 
-            /* 【关键修复】亮色模式下强制卡片变白，文字变黑 */
-            .m3-welcome-card {
-                background-color: #FFFBFE !important; 
-                border: 1px solid rgba(0, 0, 0, 0.08) !important;
-                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08) !important;
+            /* 暴力清除所有层级的暗色背景和图 */
+            html, body, #welcome, .SHADE, .welcome-bg, .FILL, #GameScoreLayer {
+                background-color: #FFFBFE !important;
+                background-image: none !important;
             }
-            .m3-headline, .m3-body, .m3-row-title {
+
+            /* 强制所有文字变深色 */
+            body, #tt, #ttt, #tttt, .m3-body, .m3-row-title, .m3-row-sub, #GameScoreLayer-text, h1, h2, p, span {
                 color: #1C1B1F !important;
             }
-            .m3-body, .m3-row-sub {
+            .m3-hint, .m3-step, #now, #nosw {
                 color: #49454F !important;
             }
-            #GameScoreLayer > .m3-dialog {
-                background-color: #FFFBFE !important;
+            .m3-link {
+                color: #6750A4 !important;
+            }
+
+            /* 欢迎卡片和弹窗变纯白，加边框区分背景 */
+            #welcome .m3-welcome-card, #GameScoreLayer > .m3-dialog {
+                background-color: #FFFBFE !important; 
+                border: 1px solid #CAC4D0 !important;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+            }
+
+            /* 亮色提示条背景 */
+            .m3-banner {
+                background-color: #FFD8E4 !important;
+                color: #31111D !important;
+            }
+
+            /* 输入框底色 */
+            .m3-textfield input {
+                background-color: #F3EDF7 !important;
+                color: #1C1B1F !important;
+                border-bottom: 1px solid #79747E !important;
             }
             .m3-textfield input:hover, .m3-textfield input:focus {
                 background-color: #E6E0E9 !important;
             }
+            .m3-textfield label {
+                color: #49454F !important;
+            }
 
-            /* 亮色游戏内背景与网格 */
+            /* 结算界面得分框 */
+            #GameScoreLayer-score, #GameScoreLayer-bast {
+                background-color: #F3EDF7 !important;
+                color: #1C1B1F !important;
+            }
+
+            /* 游戏内背景 */
             #GameLayerBG {
-                background: radial-gradient(circle at 50% 0%, #ECE6F0 0%, #FFFBFE 80%) !important;
+                background: #FFFBFE !important;
+                background-image: none !important;
             }
             .block {
-                background-color: rgba(0, 0, 0, 0.02) !important;
-                box-shadow: inset 0 0 0 1px rgba(103, 80, 164, 0.1) !important;
+                background-color: rgba(0, 0, 0, 0.03) !important;
+                box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1) !important;
             }
             .block.bl {
-                background-color: rgba(0, 0, 0, 0.05) !important;
-                box-shadow: inset 0 0 0 1px rgba(103, 80, 164, 0.2) !important;
+                background-color: rgba(0, 0, 0, 0.06) !important;
+                box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15) !important;
             }
 
-            /* 亮色时间胶囊 */
+            /* 游戏内时间胶囊 */
             #GameTimeLayer {
                 background-color: rgba(255, 255, 255, 0.95) !important;
                 color: #1C1B1F !important;
@@ -116,6 +148,7 @@
             }
         }
 
+        /* ---------- 基础重置 ---------- */
         *, *::before, *::after { box-sizing: border-box; }
         html { font-size: 16px; }
         body {
@@ -214,7 +247,7 @@
         .m3-link { display: inline-block; margin-top: 4px; padding: 8px 0; color: var(--md-primary); font-size: .875rem; font-weight: 500; text-decoration: none; border-radius: var(--md-shape-xs); }
         .m3-link:hover { text-decoration: underline; }
 
-        /* 【关键修复】默认暗色卡片 */
+        /* 默认暗色卡片 */
         .m3-welcome-card {
             width: calc(100% - 32px); max-width: 560px; margin: 24px auto; padding: 28px 20px 32px; border-radius: var(--md-shape-xl);
             background-color: #211F26 !important;
