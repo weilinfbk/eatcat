@@ -1,9 +1,9 @@
 // 强制清理旧缓存
-if (!localStorage.getItem('eatcat_v11')) {
+if (!localStorage.getItem('eatcat_v13')) {
     document.cookie.split(";").forEach(function(c) { 
         document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
     });
-    localStorage.setItem('eatcat_v11', 'ok');
+    localStorage.setItem('eatcat_v13', 'ok');
 }
 
 const isEnSystem = navigator.language.toLowerCase().includes('en');
@@ -152,14 +152,12 @@ function gameInit() {
 
 let last = 0, lkey = 0;
 
-// 【修复重开残留红块的核心点】
 function gameRestart() {
     last = 0; lkey = 0; _gameBBList = []; _gameBBListIndex = 0; _gameScore = 0; _gameOver = false; _gameStart = false;
     _gameTimeNum = __Time;
     GameTimeLayer.innerHTML = creatTimeText(_gameTimeNum);
     countBlockSize();
     
-    // 强制洗刷所有格子的状态，去除红底和猫猫
     for (let i = 0; i < GameLayer.length; i++) {
         let box = GameLayer[i];
         for (let j = 0; j < box.children.length; j++) {
@@ -372,11 +370,6 @@ function gameTapEvent(e) {
     
     if (!tar) return false;
 
-    // 1. 屏幕上方的点击一律无视（没掉下来的地方随便点都不会死）
-    if (y < touchArea[1]) {
-        return false; 
-    }
-
     if (tar.getAttribute && tar.getAttribute('data-hit') === 'true') return false;
 
     let p = _gameBBList[_gameBBListIndex];
@@ -388,9 +381,8 @@ function gameTapEvent(e) {
         clickedCol = Math.floor(x / blockSize);
     }
 
-    // 2. 判定区逻辑
+    // 判定命中逻辑
     if (!_fsj) {
-        // 没开垂直判定：点对列就算过
         if (clickedCol === p.cell) {
             hitIndex = _gameBBListIndex; 
         } else if (p.chordGroup !== undefined) {
@@ -401,7 +393,6 @@ function gameTapEvent(e) {
             }
         }
     } else {
-        // 开了垂直判定：必须点中方块本身
         if (tar.notEmpty) {
             if (p.chordGroup !== undefined) {
                 for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
@@ -416,6 +407,7 @@ function gameTapEvent(e) {
     }
 
     if (hitIndex !== -1) {
+        // 成功命中
         if (!_gameStart) gameStart();
         if (!_close) createjs.Sound.play("tap");
         
@@ -453,7 +445,19 @@ function gameTapEvent(e) {
         }
         return false;
     } else {
-        // 判定区内没点中，立刻死
+        // 【核心修复：用户的红黄圈逻辑】
+        // 获取当前真正的目标猫猫在屏幕上的位置
+        let currentCat = document.getElementById(p.id);
+        if (currentCat) {
+            let rect = currentCat.getBoundingClientRect();
+            // 如果手指点击的 Y 坐标，比当前目标猫猫的最高点还要高（在目标上面）
+            // 那么不管点的是猫猫还是空白，一律无视，绝对不能死！
+            if (y < rect.top) {
+                return false;
+            }
+        }
+
+        // 如果点在了下方（目标猫猫所在排或更低），却点错了，才会死
         if (!_gameStart) gameStart(); 
         if (!_close) createjs.Sound.play("err");
         gameOver();
