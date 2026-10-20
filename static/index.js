@@ -10,7 +10,6 @@ const isEnSystem = navigator.language.toLowerCase().includes('en');
 let isDesktop = navigator['userAgent'].match(/(ipad|iphone|ipod|android|windows phone)/i) ? false : true;
 let fontunit = isDesktop ? 20 : ((window.innerWidth > window.innerHeight ? window.innerHeight : window.innerWidth) / 320) * 10;
 
-// ===== 第一处修改：替换 document.write 加载样式 =====
 let dynamicStyle = document.createElement('style');
 dynamicStyle.type = 'text/css';
 dynamicStyle.textContent = 'html,body {font-size:' + (fontunit < 30 ? fontunit : '30') + 'px;}' +
@@ -31,8 +30,6 @@ let __k = 4;
 let _close = false;
 let _fsj = false;
 var url = './static/image/ClickBefore.png';
-
-const LOOKAHEAD = 64;
 
 function isplaying() {
     return document.getElementById('welcome').style.display == 'none' &&
@@ -59,7 +56,6 @@ function gl() {
     last = 0;
 }
 
-// ===== 第二处修改：替换 document.write 创建 gameBody =====
 if (isDesktop) {
     let gameBodyDiv = document.createElement('div');
     gameBodyDiv.id = 'gameBody';
@@ -161,10 +157,19 @@ function countBlockSize() {
 
 let _gameBBList = [], _gameBBListIndex = 0, _gameOver = false, _gameStart = false, _gameTime, _gameTimeNum, _gameScore, _date1, deviation_time;
 
+// ===== 移除 createjs，改用原生 Audio 播放，绝不卡死 =====
+function playAudio(id) {
+    if (_close) return; // 如果设置里关了音效，直接返回
+    try {
+        var audio = new Audio('./static/music/' + id + '.mp3');
+        audio.volume = 0.8; // 声音大小
+        audio.play().catch(function(e) {
+            // 浏览器拦截自动播放时静默处理
+        });
+    } catch(e) {}
+}
+
 function gameInit() {
-    createjs.Sound.registerSound({ src: "./static/music/err.mp3", id: "err" });
-    createjs.Sound.registerSound({ src: "./static/music/end.mp3", id: "end" });
-    createjs.Sound.registerSound({ src: "./static/music/tap.mp3", id: "tap" });
     gameRestart();
 }
 
@@ -216,7 +221,7 @@ function gameTime() {
         GameTimeLayer.innerHTML = isEnSystem ? '&nbsp;&nbsp;&nbsp;&nbsp;Time\'s Up!' : '&nbsp;&nbsp;&nbsp;&nbsp;时间到！';
         gameOver();
         GameLayerBG.className += ' flash';
-        if (!_close) createjs.Sound.play("end");
+        playAudio("end"); // 替换为原生播放
     } else {
         GameTimeLayer.innerHTML = creatTimeText(_gameTimeNum);
     }
@@ -420,7 +425,7 @@ function gameTapEvent(e) {
 
     if (hitIndex !== -1) {
         if (!_gameStart) gameStart();
-        if (!_close) createjs.Sound.play("tap");
+        playAudio("tap"); // 替换为原生播放
 
         let curP = _gameBBList[hitIndex];
         if (curP.hit) return false;
@@ -458,7 +463,7 @@ function gameTapEvent(e) {
         }
 
         if (!_gameStart) gameStart();
-        if (!_close) createjs.Sound.play("err");
+        playAudio("miss"); // 原先是 err，你的文件叫 miss 就用 miss
         gameOver();
         if (tar.classList && tar.classList.contains('block')) {
             tar.classList.add('bad');
@@ -591,7 +596,6 @@ function cookie(name, value, time) {
     return data;
 }
 
-// ===== 第三处修改：替换 document.write 插入游戏 DOM =====
 let gameRootDiv = document.createElement('div');
 gameRootDiv.innerHTML = createGameLayer();
 while (gameRootDiv.firstChild) {
