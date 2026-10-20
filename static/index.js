@@ -605,8 +605,11 @@ function cookie(name, value, time) {
     for (let i = 0; value.length > i; i++) name = value[i].split("="), name[1] && (data[name[0]] = unescape(name[1]));
     return data;
 }
-
-document.write(createGameLayer());
+let gameRootDiv = document.createElement('div');
+gameRootDiv.innerHTML = createGameLayer();
+while (gameRootDiv.firstChild) {
+    document.body.appendChild(gameRootDiv.firstChild);
+}
 
 // ===== 改动：抽出 rebuildGameLayer，initSetting 和 save_cookie 共用 =====
 function rebuildGameLayer() {
