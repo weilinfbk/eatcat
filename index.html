@@ -519,6 +519,47 @@
             .catch(err => console.log('PWA 注册失败:', err));
     });
                 }
+// ============== PWA 自定义安装提示逻辑 ==============
+let deferredPrompt;
+const installBtn = document.getElementById('pwa-install-btn');
+
+// 如果是 iOS 系统，不支持 beforeinstallprompt，我们可以直接隐藏按钮
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    // 阻止 Chrome 默认的迷你横幅弹出
+    e.preventDefault();
+    // 暂存事件，以便稍后触发
+    deferredPrompt = e;
+    
+    // 如果是 iOS，不显示这个按钮（因为 iOS 需要手动分享添加到主屏幕）
+    if (!isIOS) {
+        installBtn.style.display = 'inline-flex';
+    }
+});
+
+if (installBtn) {
+    installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            // 显示原生安装提示
+            deferredPrompt.prompt();
+            // 等待用户的选择
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`用户选择: ${outcome}`);
+            // 用户选完后，清空变量
+            deferredPrompt = null;
+            // 隐藏我们的按钮
+            installBtn.style.display = 'none';
+        }
+    });
+}
+
+// 监听安装完成事件
+window.addEventListener('appinstalled', () => {
+    console.log('PWA 已成功安装');
+    installBtn.style.display = 'none';
+    deferredPrompt = null;
+});
     </script>
 </body>
 </html>
