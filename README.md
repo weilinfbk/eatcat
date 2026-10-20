@@ -1,4 +1,10 @@
 # 吃掉小猫猫 - Material 3 重制版 (Eat the Cat - M3 Edition)
+<details>
+<summary>👉 Click here for the English Version</summary>
+
+（把英文版内容放在这里）
+
+</details>
 
 本项目 Fork 自 [122440367/eatcat](https://github.com/122440367/eatcat)。在保留原版核心玩法（新概念音游）与底层逻辑的基础上，对整个游戏进行了全面的 **Material Design 3 (M3)** 视觉重构、体验优化以及国际化支持。
 
