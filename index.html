@@ -3,13 +3,12 @@
 
 <head>
     <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#141218">
+    <meta name="theme-color" content="#141218">
     <meta charset="utf-8" />
     <title>吃掉小猫猫</title>
     <meta itemprop="name" content="吃掉小猫猫！" />
     <meta itemprop="description" content="新概念音游" />
     <meta name="viewport" content="initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, width=device-width,target-densitydpi=device-dpi" />
-    <meta name="theme-color" content="#141218" />
     <link rel="icon" href="./icon-192.jpg" type="image/jpeg" />
     <link rel="apple-touch-icon" href="./icon-192.jpg" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
@@ -50,7 +49,6 @@
             --md-elev-3: 0 1px 3px rgba(0, 0, 0, .30), 0 4px 8px 3px rgba(0, 0, 0, .15);
         }
 
-        /* ---------- 基础重置 ---------- */
         *, *::before, *::after { box-sizing: border-box; }
         html { font-size: 16px; }
         body {
@@ -61,12 +59,10 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* ---------- 滚动条 ---------- */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-thumb { background: var(--md-outline-variant); border-radius: 999px; }
         ::-webkit-scrollbar-track { background: transparent; }
 
-        /* ---------- 按钮：通用 ---------- */
         .m3-btn {
             position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
             min-height: 48px; padding: 0 24px; border: none; border-radius: var(--md-shape-full);
@@ -95,7 +91,6 @@
         .m3-btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
         .m3-btn-row-end { justify-content: flex-end; }
 
-        /* ---------- Chip ---------- */
         .m3-chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
         .m3-chip {
             display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 16px;
@@ -108,7 +103,6 @@
         .m3-chip:active { background-color: rgba(230, 224, 233, .14); }
         .m3-chip:focus-visible { outline: 3px solid var(--md-primary); outline-offset: 2px; }
 
-        /* ---------- TextField ---------- */
         .m3-textfield { position: relative; margin: 0 0 20px; }
         .m3-textfield input {
             width: 100%; height: 56px; padding: 24px 16px 8px; border: none; border-bottom: 1px solid var(--md-on-surface-variant);
@@ -125,7 +119,6 @@
         .m3-textfield input:focus + label, .m3-textfield input:not(:placeholder-shown) + label { top: 7px; font-size: .75rem; }
         .m3-textfield input:focus + label { color: var(--md-primary); }
 
-        /* ---------- Switch ---------- */
         .m3-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
         .m3-row-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
         .m3-row-title { font-size: .9375rem; font-weight: 500; color: var(--md-on-surface); }
@@ -213,10 +206,7 @@
         #welcome .FILL { overflow-y: auto !important; overflow-x: hidden !important; -webkit-overflow-scrolling: touch; }
         #GameLayerBG { position: absolute !important; top: 0; left: 0; right: 0; bottom: 0; width: 100vw !important; height: 100vh !important; }
 
-
-        /* ========================================================= */
-        /* ============= 【终极通透版】系统亮色模式 ============= */
-        /* ========================================================= */
+        /* ================= 亮色模式 ================= */
         @media (prefers-color-scheme: light) {
             :root {
                 --md-primary: #6750A4;
@@ -241,73 +231,20 @@
                 --md-outline: #79747E;
                 --md-outline-variant: #CAC4D0;
             }
-
-            /* 1. 背景去死白：用浅紫灰做底色，让页面有层次 */
             html, body { background-color: #F3EDF7 !important; }
-            #welcome, .SHADE, .welcome-bg, .FILL {
-                background-color: transparent !important;
-                background-image: none !important;
-            }
-
-            /* 2. 主页卡片和弹窗：毛玻璃半透明质感 */
-            .m3-welcome-card, #GameScoreLayer > .m3-dialog {
-                background-color: rgba(255, 255, 255, 0.85) !important; 
-                -webkit-backdrop-filter: blur(20px) !important;
-                backdrop-filter: blur(20px) !important;
-                border: 1px solid rgba(255, 255, 255, 0.5) !important;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08) !important;
-            }
-
-            /* 3. 结算界面遮罩（图二） */
-            #GameScoreLayer {
-                background-color: rgba(243, 237, 247, 0.9) !important; 
-            }
-            #GameScoreLayer-text, #now, #nosw, #GameScoreLayer-bast, #GameScoreLayer-score {
-                color: #1C1B1F !important;
-            }
-            #GameScoreLayer-score, #GameScoreLayer-bast {
-                background-color: rgba(0, 0, 0, 0.05) !important; 
-            }
-
-            /* 4. 强制文字深色，防止隐身 */
-            body, #tt, #ttt, #tttt, .m3-body, .m3-row-title, .m3-row-sub, h1, h2, p, span {
-                color: #1C1B1F !important;
-            }
+            #welcome, .SHADE, .welcome-bg, .FILL { background-color: transparent !important; background-image: none !important; }
+            .m3-welcome-card, #GameScoreLayer > .m3-dialog { background-color: rgba(255, 255, 255, 0.85) !important; -webkit-backdrop-filter: blur(20px) !important; backdrop-filter: blur(20px) !important; border: 1px solid rgba(255, 255, 255, 0.5) !important; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08) !important; }
+            #GameScoreLayer { background-color: rgba(243, 237, 247, 0.9) !important; }
+            #GameScoreLayer-text, #now, #nosw, #GameScoreLayer-bast, #GameScoreLayer-score { color: #1C1B1F !important; }
+            #GameScoreLayer-score, #GameScoreLayer-bast { background-color: rgba(0, 0, 0, 0.05) !important; }
+            body, #tt, #ttt, #tttt, .m3-body, .m3-row-title, .m3-row-sub, h1, h2, p, span { color: #1C1B1F !important; }
             .m3-hint, .m3-step { color: #49454F !important; }
-
-            /* 5. 亮色输入框适配 */
-            .m3-textfield input {
-                background-color: rgba(0, 0, 0, 0.04) !important;
-                color: #1C1B1F !important;
-                border-bottom: 1px solid #79747E !important;
-            }
-            .m3-textfield input:hover, .m3-textfield input:focus {
-                background-color: rgba(0, 0, 0, 0.08) !important;
-            }
-
-            /* 6. 游戏内背景（图一）：透明磨砂或者浅色渐变 */
-            #GameLayerBG {
-                background: linear-gradient(180deg, #E8DEF8 0%, #F3EDF7 100%) !important;
-            }
-            
-            /* 游戏网格变成半透明白色方块，很有质感 */
-            .block {
-                background-color: rgba(255, 255, 255, 0.3) !important;
-                box-shadow: inset 0 0 0 1px rgba(103, 80, 164, 0.1) !important;
-            }
-            .block.bl {
-                background-color: rgba(255, 255, 255, 0.6) !important;
-                box-shadow: inset 0 0 0 1px rgba(103, 80, 164, 0.2) !important;
-            }
-
-            /* 7. 游戏时间胶囊变白底黑字 */
-            #GameTimeLayer {
-                background-color: rgba(255, 255, 255, 0.85) !important;
-                color: #1C1B1F !important;
-                border: 1px solid rgba(255, 255, 255, 0.8) !important;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
-                text-shadow: none !important;
-            }
+            .m3-textfield input { background-color: rgba(0, 0, 0, 0.04) !important; color: #1C1B1F !important; border-bottom: 1px solid #79747E !important; }
+            .m3-textfield input:hover, .m3-textfield input:focus { background-color: rgba(0, 0, 0, 0.08) !important; }
+            #GameLayerBG { background: linear-gradient(180deg, #E8DEF8 0%, #F3EDF7 100%) !important; }
+            .block { background-color: rgba(255, 255, 255, 0.3) !important; box-shadow: inset 0 0 0 1px rgba(103, 80, 164, 0.1) !important; }
+            .block.bl { background-color: rgba(255, 255, 255, 0.6) !important; box-shadow: inset 0 0 0 1px rgba(103, 80, 164, 0.2) !important; }
+            #GameTimeLayer { background-color: rgba(255, 255, 255, 0.85) !important; color: #1C1B1F !important; border: 1px solid rgba(255, 255, 255, 0.8) !important; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important; text-shadow: none !important; }
         }
     </style>
 
@@ -318,7 +255,7 @@
 </head>
 
 <body onLoad="init()" oncontextmenu=self.event.returnValue=false>
-   <!-- 结算层 -->
+    <!-- 结算层 -->
     <div id="GameScoreLayer" class="BBOX SHADE bgc1" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:100;">
         <div class="m3-dialog">
             <div id="GameScoreLayer-text"></div>
@@ -368,6 +305,8 @@
                         <button type="button" class="m3-chip" onclick="autoset('32')">交互</button>
                         <button type="button" class="m3-chip" onclick="stair()">楼梯</button>
                         <button type="button" class="m3-chip" onclick="autoset('@##')">三纵</button>
+                        
+                        <!-- 多压按钮 -->
                         <button type="button" class="m3-chip" onclick="autoset('D')">双押</button>
                         <button type="button" class="m3-chip" onclick="autoset('T')">三押</button>
                         <button type="button" class="m3-chip" onclick="autoset('A')">全压</button>
@@ -450,7 +389,7 @@
         </div>
     </div>
 
-    <!-- 终极翻译脚本 -->
+    <!-- 终极翻译脚本 + PWA 注册 -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const settingsBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('游戏设置') || b.innerText.includes('Settings'));
@@ -480,13 +419,14 @@
                     '若按键全部消失，请刷新界面': 'If notes disappear, please refresh',
                     '纯随机': 'Pure Random', '无纵连的随机': 'Random (No Jacks)', '短纵': 'Short Jack',
                     '全纵连': 'Full Jack', '交互': 'Trill', '楼梯': 'Staircase', '三纵': 'Triple Jack',
+                    '双押': 'Double', '三押': 'Triple', '全压': 'Full Chord',
                     '游戏设置': 'Settings', '点击开始': 'Start Game', '若出现了 bug，点击此按钮后刷新界面': 'If bug occurs, click here to refresh',
                     '基础设置': 'Basic Settings', '键数（建议 2~8）': 'Lane Count (2~8)', '绑定按键（如 dfjk）': 'Bind Keys (e.g., dfjk)',
                     '时间限制（秒）': 'Time Limit (sec)', '键型': 'Pattern', '游玩偏好': 'Preferences',
                     '关闭音效': 'Mute Sound', '隐藏结算评语': 'Hide Result Comments', '开启垂直判定': 'Enable Vertical Judgement',
                     '自定义按键图片': 'Custom Note Image', '选择图片': 'Choose Image', '上一页': 'Prev', '下一页': 'Next',
                     '完成': 'Done', '得分': 'Score', '最佳': 'Best', '电脑端玩家按下R键可一键重开哦~': "PC players press 'R' to restart",
-                    '重来': 'Retry', '返回主页': 'Home', '双押': 'Double', '三押': 'Triple', '全压': 'Full Chord',
+                    '重来': 'Retry', '返回主页': 'Home'
                 };
 
                 const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
@@ -509,48 +449,16 @@
                 if(sub && sub.innerText.includes('支持')) sub.innerText = "Supports GIF / PNG / JPG / WebP";
             } catch (e) { console.error(e); }
         }
-        /// 注册service worker
-    if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('PWA 注册成功:', reg.scope))
-            .catch(err => console.log('PWA 注册失败:', err));
-    });
-                }
-// ============== PWA 自定义安装提示逻辑 ==============
-let deferredPrompt;
-const installBtn = document.getElementById('pwa-install-btn');
 
-// 如果是 iOS 系统，不支持 beforeinstallprompt，我们可以直接隐藏按钮
-const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
-window.addEventListener('beforeinstallprompt', (e) => {
-    // 阻止 Chrome 默认的迷你横幅弹出
-    e.preventDefault();
-    // 暂存事件，以便稍后触发
-    deferredPrompt = e;
-    
-    // 如果是 iOS，不显示这个按钮（因为 iOS 需要手动分享添加到主屏幕）
-    if (!isIOS) {
-        installBtn.style.display = 'inline-flex';
-    }
-});
-
-if (installBtn) {
-    installBtn.addEventListener('click', async () => {
-        if (deferredPrompt) {
-            // 显示原生安装提示
-            deferredPrompt.prompt();
-            // 等待用户的选择
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log(`用户选择: ${outcome}`);
-            // 用户选完后，清空变量
-            deferredPrompt = null;
-            // 隐藏我们的按钮
-            installBtn.style.display = 'none';
+        // 注册 Service Worker (PWA)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('PWA 注册成功:', reg.scope))
+                    .catch(err => console.log('PWA 注册失败:', err));
+            });
         }
-    });
-}
     </script>
 </body>
+
 </html>
