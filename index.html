@@ -1,11 +1,24 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-<script>eruda.init();</script>
 <head>
+    <meta charset="utf-8" />
+    
+    <!-- 🌟 终极核弹：强制注销所有旧的 Service Worker，打破缓存死循环 🌟 -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                } 
+            });
+        }
+        // 🌟 终极防御：强行造一个假的音效库，哪怕断网也能玩（只是没声音）🌟
+        window.createjs = { Sound: { registerSound: function(){}, play: function(){} } };
+    </script>
+    <!-- 🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟🌟 -->
+
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#141218">
-    <meta charset="utf-8" />
     <title>吃掉小猫猫</title>
     <meta itemprop="name" content="吃掉小猫猫！" />
     <meta itemprop="description" content="新概念音游" />
@@ -409,6 +422,8 @@
             });
         }
     </script>
+    
+    <!-- 注意：index.js 必须放在最底部！ -->
     <script src="./static/index.js"></script>
 </body>
 </html>
