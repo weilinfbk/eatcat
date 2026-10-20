@@ -1,9 +1,9 @@
 // 强制清理旧缓存
-if (!localStorage.getItem('eatcat_v4')) {
+if (!localStorage.getItem('eatcat_v6')) {
     document.cookie.split(";").forEach(function(c) { 
         document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
     });
-    localStorage.setItem('eatcat_v4', 'ok');
+    localStorage.setItem('eatcat_v6', 'ok');
 }
 
 const isEnSystem = navigator.language.toLowerCase().includes('en');
@@ -75,7 +75,7 @@ function init() {
     GameLayer[1].children = GameLayer[1].querySelectorAll('div');
     GameLayerBG = document.getElementById('GameLayerBG');
     
-    // 完美支持多点触控
+    // 完美支持多指触控
     if (GameLayerBG.ontouchstart === null) {
         GameLayerBG.addEventListener('touchstart', function(e) {
             e.preventDefault(); 
@@ -351,41 +351,41 @@ function gameLayerMoveNextRow() {
 
 function gameTapEvent(e) {
     if (_gameOver) return false;
-    let tar = e.target;
-    if (!tar || !tar.classList.contains('block')) return false;
     
+    let tar = e.target;
     let y = e.clientY;
     let x = e.clientX - body.offsetLeft;
+    
+    if (!tar) return false;
     if (!_fsj && (y > touchArea[0] || y < touchArea[1])) return false;
 
-    // 如果这个方块已经被点过了
-    if (tar.getAttribute('data-hit') === 'true') return false;
+    if (tar.getAttribute && tar.getAttribute('data-hit') === 'true') return false;
 
     let p = _gameBBList[_gameBBListIndex];
     if (!p) return false;
 
     let hitIndex = -1;
 
-    // 在接下来的几个（当前组）找是不是匹配
-    for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
-        let cur = _gameBBList[i];
-        if (cur.id == tar.id) {
-            hitIndex = i;
-            break;
+    // 多压判定：必须点中组内的目标
+    if (p.chordGroup !== undefined) {
+        for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
+            let cur = _gameBBList[i];
+            if (cur.chordGroup !== p.chordGroup) break;
+            if (cur.id == tar.id) {
+                hitIndex = i;
+                break;
+            }
         }
-        // 如果已经跨越了当前组，就停止查找
-        if (cur.chordGroup !== undefined && p.chordGroup !== undefined && cur.chordGroup !== p.chordGroup) {
-            break;
-        }
-    }
-
-    // 兼容单键模式的区域点击
-    if (hitIndex === -1 && p.chordGroup === undefined) {
-        if (((p.id == tar.id || (_fsj && p.id % __k == tar.id % __k))) || 
-            (p.cell == 0 && x < blockSize) || 
-            (x > p.cell * blockSize && x < (p.cell + 1) * blockSize) || 
-            (p.cell == (__k - 1) && x > (__k - 1) * blockSize)) {
+    } else {
+        // 单键判定：点中目标方块，或点中目标列的背景
+        if (p.id == tar.id) {
             hitIndex = _gameBBListIndex;
+        } else if (tar === GameLayerBG || (tar.classList && (tar.classList.contains('GameLayer') || tar.id === 'GameLayerBG'))) {
+            if ((p.cell == 0 && x < blockSize) || 
+                (x > p.cell * blockSize && x < (p.cell + 1) * blockSize) || 
+                (p.cell == (__k - 1) && x > (__k - 1) * blockSize)) {
+                hitIndex = _gameBBListIndex;
+            }
         }
     }
 
@@ -393,7 +393,8 @@ function gameTapEvent(e) {
         if (!_gameStart) gameStart();
         if (!_close) createjs.Sound.play("tap");
         
-        tar.setAttribute('data-hit', 'true'); 
+        if (tar.setAttribute) tar.setAttribute('data-hit', 'true');
+
         let curP = _gameBBList[hitIndex];
         curP.hit = true; 
         
@@ -402,16 +403,19 @@ function gameTapEvent(e) {
             curTar.className = curTar.className.replace(_ttreg, ' tt$1');
             curTar.style.backgroundImage = "none";
             curTar.notEmpty = false;
+            curTar.setAttribute('data-hit', 'true');
         }
         _gameScore++;
 
-        // 检查这一组是不是全被点完了
         let allHit = true;
         if (p.chordGroup !== undefined) {
             for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
                 let cur = _gameBBList[i];
                 if (cur.chordGroup !== p.chordGroup) break;
-                if (!cur.hit) allHit = false;
+                if (!cur.hit) {
+                    allHit = false;
+                    break;
+                }
             }
         } else {
             allHit = true;
@@ -426,9 +430,11 @@ function gameTapEvent(e) {
 
         return false;
     } else {
-        if (_gameStart) {
-            if (!_close) createjs.Sound.play("err");
-            gameOver();
+        // 【关键修复】只要没点中，不管游戏开没开始，直接 GameOver！
+        if (!_gameStart) gameStart(); 
+        if (!_close) createjs.Sound.play("err");
+        gameOver();
+        if (tar.classList && tar.classList.contains('block')) {
             tar.className += ' bad';
         }
     }
