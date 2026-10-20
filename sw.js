@@ -1,8 +1,10 @@
-// 基础 Service Worker，用于满足 PWA 的安装条件
 self.addEventListener('install', (e) => {
     self.skipWaiting();
 });
 
 self.addEventListener('fetch', (e) => {
-    // 暂时留空，由浏览器处理默认网络请求
+    // 处理网络请求，防止页面资源加载失败
+    e.respondWith(fetch(e.request).catch(() => {
+        // 失败时的静默处理
+    }));
 });
