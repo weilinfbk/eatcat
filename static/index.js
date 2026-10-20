@@ -1,9 +1,9 @@
 // 强制清理旧缓存
-if (!localStorage.getItem('eatcat_v8')) {
+if (!localStorage.getItem('eatcat_v9')) {
     document.cookie.split(";").forEach(function(c) { 
         document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
     });
-    localStorage.setItem('eatcat_v8', 'ok');
+    localStorage.setItem('eatcat_v9', 'ok');
 }
 
 const isEnSystem = navigator.language.toLowerCase().includes('en');
@@ -359,21 +359,20 @@ function gameTapEvent(e) {
     
     if (!tar) return false;
 
-    // 1. 如果点到了屏幕上方的区域（还没掉下来的地方），直接无视，绝不能死！
-    // touchArea[1] 是判定区的上边界，y 小于它说明点在上面
+    // 1. 屏幕上方区域随便点都不算错，直接无视（没掉下来之前乱按不死）
     if (y < touchArea[1]) {
         return false; 
     }
 
-    // 如果这个方块已经被手指点过了（多指连按时防重复）
+    // 防止多指连按同一个方块
     if (tar.getAttribute && tar.getAttribute('data-hit') === 'true') return false;
 
     let p = _gameBBList[_gameBBListIndex];
     if (!p) return false;
 
     let hitIndex = -1;
-    
-    // 2. 如果开启了垂直判定，必须精确点中方块本身
+
+    // 2. 开启垂直判定的情况（严格）
     if (_fsj) {
         if (tar.notEmpty) {
             if (p.chordGroup !== undefined) {
@@ -387,10 +386,12 @@ function gameTapEvent(e) {
             }
         }
     } 
-    // 3. 没开垂直判定，看 x 所在的列即可（就算点到同列的空白也算过）
+    // 3. 没开启垂直判定的情况（宽松，点同一列的空白也算过）
     else {
         let clickedCol = -1;
-        if (x >= 0) clickedCol = Math.floor(x / blockSize);
+        if (x >= 0 && x < body.offsetWidth) {
+            clickedCol = Math.floor(x / blockSize);
+        }
         
         if (clickedCol === p.cell) {
             hitIndex = _gameBBListIndex; 
@@ -403,74 +404,7 @@ function gameTapEvent(e) {
         }
     }
 
-    // 4. 如果成功命中
-    if (hitIndex !== -1) {
-        if (!_gameStart) gameStart(); // 命中第一个才正式倒计时
-        if (!_close) createjs.Sound.play("tap");
-        
-        if (tar.setAttribute) tar.setAttribute('data-hit', 'true');
-
-        let curP = _gameBBList[hitIndex];
-        curP.hit = true; 
-        
-        let curTar = document.getElementById(curP.id);
-        if (curTar) {
-            curTar.className = curTar.className.replace(_ttreg, ' tt$1');
-            curTar.style.backgroundImage = "none";
-            curTar.notEmpty = false;
-            curTar.setAttribute('data-hit', 'true');
-        }
-        _gameScore++;
-
-        let allHit = true;
-        if (p.chordGroup !== undefined) {
-            for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
-                let cur = _gameBBList[i];
-                if (cur.chordGroup !== p.chordGroup) break;
-                if (!cur.hit) {
-                    allHit = false;
-                    break;
-                }
-            }
-        }
-
-        if (allHit) {
-            while (_gameBBListIndex < _gameBBList.length && _gameBBList[_gameBBListIndex].hit) {
-                _gameBBListIndex++;
-            }
-            gameLayerMoveNextRow();
-        }
-        return false;
-    } else {
-        // 5. 没有命中任何目标方块（在判定区内点错了）
-        if (!_gameStart) gameStart(); 
-        if (!_close) createjs.Sound.play("err");
-        gameOver();
-        if (tar.classList && tar.classList.contains('block')) {
-            tar.className += ' bad';
-        }
-        return false;
-    }
-}
-
-    // 下面是点到了猫猫方块的情况
-    let hitIndex = -1;
-
-    if (p.chordGroup !== undefined) {
-        for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
-            let cur = _gameBBList[i];
-            if (cur.chordGroup !== p.chordGroup) break;
-            if (cur.id == tar.id) {
-                hitIndex = i;
-                break;
-            }
-        }
-    } else {
-        if (p.id == tar.id) {
-            hitIndex = _gameBBListIndex;
-        }
-    }
-
+    // 4. 成功命中
     if (hitIndex !== -1) {
         if (!_gameStart) gameStart();
         if (!_close) createjs.Sound.play("tap");
@@ -489,6 +423,7 @@ function gameTapEvent(e) {
         }
         _gameScore++;
 
+        // 检查多压是否全部按完
         let allHit = true;
         if (p.chordGroup !== undefined) {
             for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
@@ -509,10 +444,16 @@ function gameTapEvent(e) {
         }
         return false;
     } else {
-        // 点到了有猫猫的块，但不是当前目标（比如上面还没掉下来的猫猫），直接无视
+        // 5. 没命中任何目标（在判定区点错列或者点错空块），立刻结束
+        if (!_gameStart) gameStart(); 
+        if (!_close) createjs.Sound.play("err");
+        gameOver();
+        if (tar.classList && tar.classList.contains('block')) {
+            tar.className += ' bad';
+        }
         return false;
     }
-                }}
+}
 
 function createGameLayer() {
     let html = '<div id="GameLayerBG">';
