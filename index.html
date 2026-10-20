@@ -2,6 +2,8 @@
 <html lang="zh-CN">
 
 <head>
+    <link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#141218">
     <meta charset="utf-8" />
     <title>吃掉小猫猫</title>
     <meta itemprop="name" content="吃掉小猫猫！" />
@@ -504,6 +506,14 @@
                 if(sub && sub.innerText.includes('支持')) sub.innerText = "Supports GIF / PNG / JPG / WebP";
             } catch (e) { console.error(e); }
         }
+        /// 注册service worker
+    if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('PWA 注册成功:', reg.scope))
+            .catch(err => console.log('PWA 注册失败:', err));
+    });
+                }
     </script>
 </body>
 </html>
