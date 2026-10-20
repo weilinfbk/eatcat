@@ -252,7 +252,6 @@ function randomPos() {
             x = parseInt(key[last]) - 1;
         }
         
-        // 强制容错，防止 NaN 导致游戏卡死
         if (isNaN(x) || x < 0 || x >= __k) x = 0;
         posArray = [x];
     }
@@ -263,11 +262,26 @@ function randomPos() {
     return posArray;
 }
 
+// ================= 核心修复：完美还原原版填满屏幕 + 支持多压 =================
 function refreshGameLayer(box, loop, offset) {
-    let positions = randomPos();
-    let isChord = positions.length > 1;
-    let chordGroup = Math.random();
-
+    let totalRows = Math.floor(box.children.length / __k);
+    let targetMap = {};
+    
+    // 如果是滚动拼接（loop=1），从头填满；如果是初始化，从第二排开始填（第一排空着作为底）
+    let startRow = (loop ? 0 : 1); 
+    let endRow = totalRows;
+    
+    // 一次性生成所有排的按键位置
+    for (let row = startRow; row < endRow; row++) {
+        let positions = randomPos();
+        let isChord = positions.length > 1;
+        let chordGroup = Math.random();
+        positions.forEach(p => {
+            targetMap[p + row * __k] = { chordGroup: isChord ? chordGroup : -1 };
+        });
+    }
+    
+    // 渲染方块并推入待判定队列
     for (let j = 0; j < box.children.length; j++) {
         let r = box.children[j], rstyle = r.style;
         rstyle.left = (j % __k) * blockSize + 'px';
@@ -277,25 +291,17 @@ function refreshGameLayer(box, loop, offset) {
         rstyle.backgroundImage = "none";
         r.className = r.className.replace(_clearttClsReg, '');
         
-        let hit = false;
-        for (let p = 0; p < positions.length; p++) {
-            let targetPos = positions[p] + (loop ? 0 : __k);
-            if (j == targetPos) {
-                _gameBBList.push({ 
-                    cell: targetPos % __k, 
-                    id: r.id, 
-                    chordGroup: isChord ? chordGroup : -1
-                });
-                rstyle.backgroundImage = "url(" + url + ")";
-                rstyle.backgroundSize = 'cover';
-                r.className += ' t' + (Math.floor(Math.random() * 1000) % (__k + 1) + 1);
-                r.notEmpty = true;
-                hit = true;
-                break;
-            }
-        }
-        
-        if (!hit) {
+        if (targetMap[j]) {
+            _gameBBList.push({ 
+                cell: j % __k, 
+                id: r.id, 
+                chordGroup: targetMap[j].chordGroup
+            });
+            rstyle.backgroundImage = "url(" + url + ")";
+            rstyle.backgroundSize = 'cover';
+            r.className += ' t' + (Math.floor(Math.random() * 1000) % (__k + 1) + 1);
+            r.notEmpty = true;
+        } else {
             r.notEmpty = false;
         }
     }
@@ -341,7 +347,6 @@ function gameTapEvent(e) {
     if (!p) return false;
     if (!_fsj && (y > touchArea[0] || y < touchArea[1])) return false;
 
-    // 查找到底点中了哪个按键（支持多压的任意一个）
     let isHit = false;
     for (let i = _gameBBListIndex; i < Math.min(_gameBBListIndex + 4, _gameBBList.length); i++) {
         let cur = _gameBBList[i];
@@ -355,7 +360,6 @@ function gameTapEvent(e) {
         }
     }
 
-    // 如果没点到实体，点到了大致区域也算
     if (!isHit) {
         if ((p.cell == 0 && x < blockSize) || (x > p.cell * blockSize && x < (p.cell + 1) * blockSize) || (p.cell == (__k - 1) && x > (__k - 1) * blockSize)) {
             isHit = true;
@@ -368,7 +372,6 @@ function gameTapEvent(e) {
         
         let groupToKill = p.chordGroup;
         
-        // 消除当前及同组按键
         do {
             let curP = _gameBBList[_gameBBListIndex];
             let curTar = document.getElementById(curP.id);
