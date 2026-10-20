@@ -1,9 +1,9 @@
-// 强制清理可能存在的旧版本坏键型缓存
-if (!localStorage.getItem('eatcat_v1')) {
+// 强制清理旧缓存
+if (!localStorage.getItem('eatcat_v2')) {
     document.cookie.split(";").forEach(function(c) { 
         document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
     });
-    localStorage.setItem('eatcat_v1', 'ok');
+    localStorage.setItem('eatcat_v2', 'ok');
 }
 
 const isEnSystem = navigator.language.toLowerCase().includes('en');
@@ -89,18 +89,11 @@ function init() {
     btn.onclick = function () { closeWelcomeLayer(); }
 }
 
-function winOpen() {
-    window.open(location.href + '?r=' + Math.random(), 'nWin', 'height=500,width=320,toolbar=no,menubar=no,scrollbars=no');
-    let opened = window.open('about:blank', '_self');
-    opened.opener = null;
-    opened.close();
-}
-let refreshSizeTime;
-
 function refreshSize() {
     clearTimeout(refreshSizeTime);
     refreshSizeTime = setTimeout(_refreshSize, 200);
 }
+let refreshSizeTime;
 
 function _refreshSize() {
     countBlockSize();
@@ -197,115 +190,128 @@ function Randomfrom(Min, Max) {
     return Min + Math.round(Rand * Range);
 }
 
+// 纯粹的原版单键位置生成（完全没改动）
 function randomPos() {
     let x = 0;
-    let posArray = [];
-
-    if (key[last] == 'D' && __k >= 2) {
-        let a = Math.floor(Math.random() * __k);
-        let b;
-        do { b = Math.floor(Math.random() * __k); } while (b === a);
-        posArray = [a, b];
-    } else if (key[last] == 'T' && __k >= 3) {
-        let a = Math.floor(Math.random() * __k);
-        let b; do { b = Math.floor(Math.random() * __k); } while (b === a);
-        let c; do { c = Math.floor(Math.random() * __k); } while (c === a || c === b);
-        posArray = [a, b, c];
-    } else if (key[last] == 'A' && __k >= 4) {
-        for (let i = 0; i < __k; i++) posArray.push(i);
-    } else {
-        if (key[last] == 'D' || key[last] == 'T' || key[last] == 'A') {
-            x = Math.floor(Math.random() * 1000) % __k;
-        } else if (key[last] == '!') {
-            x = Math.floor(Math.random() * 1000) % __k;
-        } else if (key[last] == '@') {
-            x = Math.floor(Math.random() * 1000) % __k;
-            if (x == lkey) {
-                x++;
-                if (x == __k) x = 0;
-            }
-        } else if (key[last] == '#') {
-            x = lkey;
-        } else if (key[last] == '&') {
-            x = __k - 1 - lkey;
-        } else if (key[last] == '+') {
-            let num = parseInt(key[last + 1]);
-            last++;
-            x = (lkey + num) % __k;
-        } else if (key[last] == '-') {
-            let num = parseInt(key[last + 1]);
-            last++;
-            x = (lkey - num + __k) % __k;
-        } else if (key[last] == '%') {
-            let num1 = parseInt(key[last + 1]) - 1;
-            let num2 = parseInt(key[last + 2]) - 1;
-            if (num2 < num1) num2 += __k;
-            x = Randomfrom(num1, num2) % __k;
-            last += 2;
-        } else if (key[last] == '*') {
-            let l = parseInt(key[last + 1]);
-            let nums = [];
-            for (let i = 1; i <= l; ++i) nums.push(parseInt(key[last + i + 1]) - 1);
-            last += l + 1;
-            x = nums[Randomfrom(0, l - 1)];
-        } else {
-            x = parseInt(key[last]) - 1;
+    if (key[last] == '!') {
+        x = Math.floor(Math.random() * 1000) % __k;
+        let pos = last - 1;
+        if (pos == -1) pos = len - 1;
+    } else if (key[last] == '@') {
+        x = Math.floor(Math.random() * 1000) % __k;
+        if (x == lkey) {
+            x++;
+            if (x == __k) x = 0;
         }
-        
-        if (isNaN(x) || x < 0 || x >= __k) x = 0;
-        posArray = [x];
+    } else if (key[last] == '#') {
+        x = lkey;
+    } else if (key[last] == '&') {
+        x = __k - 1 - lkey;
+    } else if (key[last] == '+') {
+        let num = parseInt(key[last + 1]);
+        last++;
+        x = (lkey + num) % __k;
+    } else if (key[last] == '-') {
+        let num = parseInt(key[last + 1]);
+        last++;
+        x = (lkey - num + __k) % __k;
+    } else if (key[last] == '%') {
+        let num1 = parseInt(key[last + 1]) - 1;
+        let num2 = parseInt(key[last + 2]) - 1;
+        if (num2 < num1) num2 += __k;
+        x = Randomfrom(num1, num2) % __k;
+        last += 2;
+    } else if (key[last] == '*') {
+        let l = parseInt(key[last + 1]);
+        let nums = [];
+        for (let i = 1; i <= l; ++i) nums.push(parseInt(key[last + i + 1]) - 1);
+        last += l + 1;
+        x = nums[Randomfrom(0, l - 1)];
+    } else {
+        x = parseInt(key[last]) - 1;
     }
-
-    lkey = posArray[0];
+    
+    if (isNaN(x) || x < 0 || x >= __k) x = 0;
+    lkey = x;
     last++;
     if (last == len) last = 0;
-    return posArray;
+    return x;
 }
 
-// ================= 核心修复：完美还原原版填满屏幕 + 支持多压 =================
+// ================= 核心分离：单键走原版，多压走专用铺满 =================
 function refreshGameLayer(box, loop, offset) {
-    let totalRows = Math.floor(box.children.length / __k);
-    let targetMap = {};
-    
-    // 如果是滚动拼接（loop=1），从头填满；如果是初始化，从第二排开始填（第一排空着作为底）
-    let startRow = (loop ? 0 : 1); 
-    let endRow = totalRows;
-    
-    // 一次性生成所有排的按键位置
-    for (let row = startRow; row < endRow; row++) {
-        let positions = randomPos();
-        let isChord = positions.length > 1;
-        let chordGroup = Math.random();
-        positions.forEach(p => {
-            targetMap[p + row * __k] = { chordGroup: isChord ? chordGroup : -1 };
-        });
-    }
-    
-    // 渲染方块并推入待判定队列
-    for (let j = 0; j < box.children.length; j++) {
-        let r = box.children[j], rstyle = r.style;
-        rstyle.left = (j % __k) * blockSize + 'px';
-        rstyle.bottom = Math.floor(j / __k) * blockSize + 'px';
-        rstyle.width = blockSize + 'px';
-        rstyle.height = blockSize + 'px';
-        rstyle.backgroundImage = "none";
-        r.className = r.className.replace(_clearttClsReg, '');
+    let currentKey = key[last];
+    let isChordMode = (currentKey === 'D' || currentKey === 'T' || currentKey === 'A');
+
+    if (isChordMode) {
+        // 【多压模式铺满】
+        let startRow = loop ? 0 : 1;
+        let totalRows = Math.floor(box.children.length / __k);
         
-        if (targetMap[j]) {
-            _gameBBList.push({ 
-                cell: j % __k, 
-                id: r.id, 
-                chordGroup: targetMap[j].chordGroup
-            });
-            rstyle.backgroundImage = "url(" + url + ")";
-            rstyle.backgroundSize = 'cover';
-            r.className += ' t' + (Math.floor(Math.random() * 1000) % (__k + 1) + 1);
-            r.notEmpty = true;
-        } else {
+        // 先清空所有方块
+        for (let j = 0; j < box.children.length; j++) {
+            let r = box.children[j], rstyle = r.style;
+            rstyle.left = (j % __k) * blockSize + 'px';
+            rstyle.bottom = Math.floor(j / __k) * blockSize + 'px';
+            rstyle.width = blockSize + 'px';
+            rstyle.height = blockSize + 'px';
+            rstyle.backgroundImage = "none";
+            r.className = r.className.replace(_clearttClsReg, '');
             r.notEmpty = false;
         }
+
+        // 逐行填满
+        for (let row = startRow; row < totalRows; row++) {
+            let posArray = [];
+            let pCount = 2;
+            if (currentKey === 'T' && __k >= 3) pCount = 3;
+            if (currentKey === 'A' && __k >= 4) pCount = __k;
+
+            let allCols = Array.from({length: __k}, (_, i) => i);
+            for(let i=0; i<pCount; i++) {
+                let idx = Math.floor(Math.random() * allCols.length);
+                posArray.push(allCols.splice(idx, 1)[0]);
+            }
+            posArray.sort((a,b)=>a-b);
+
+            posArray.forEach(col => {
+                let targetJ = row * __k + col;
+                let r = box.children[targetJ];
+                if(r) {
+                    _gameBBList.push({ cell: col, id: r.id, isChord: true, chordGroup: row + (loop ? 100 : 0) });
+                    r.style.backgroundImage = "url(" + url + ")";
+                    r.style.backgroundSize = 'cover';
+                    r.className += ' t' + (Math.floor(Math.random() * 1000) % (__k + 1) + 1);
+                    r.notEmpty = true;
+                }
+            });
+        }
+    } else {
+        // 【原版单键模式铺满】完全照抄旧版逻辑
+        let i = randomPos() + (loop ? 0 : __k);
+        for (let j = 0; j < box.children.length; j++) {
+            let r = box.children[j], rstyle = r.style;
+            rstyle.left = (j % __k) * blockSize + 'px';
+            rstyle.bottom = Math.floor(j / __k) * blockSize + 'px';
+            rstyle.width = blockSize + 'px';
+            rstyle.height = blockSize + 'px';
+            rstyle.backgroundImage = "none";
+            r.className = r.className.replace(_clearttClsReg, '');
+            if (i == j) {
+                _gameBBList.push({ cell: i % __k, id: r.id, isChord: false });
+                rstyle.backgroundImage = "url(" + url + ")";
+                rstyle.backgroundSize = 'cover';
+                r.className += ' t' + (Math.floor(Math.random() * 1000) % (__k + 1) + 1);
+                r.notEmpty = true;
+                if (j < box.children.length - __k) {
+                    i = randomPos() + (Math.floor(j / __k) + 1) * __k;
+                }
+            } else {
+                r.notEmpty = false;
+            }
+        }
     }
-    
+
     if (loop) {
         box.style.webkitTransitionDuration = '0ms';
         box.style.display = 'none';
@@ -347,31 +353,13 @@ function gameTapEvent(e) {
     if (!p) return false;
     if (!_fsj && (y > touchArea[0] || y < touchArea[1])) return false;
 
-    let isHit = false;
-    for (let i = _gameBBListIndex; i < Math.min(_gameBBListIndex + 4, _gameBBList.length); i++) {
-        let cur = _gameBBList[i];
-        if (cur.id == tar.id && tar.notEmpty) {
-            isHit = true;
-            break;
-        }
-        if (p.chordGroup !== -1 && cur.chordGroup === p.chordGroup && tar.notEmpty) {
-            isHit = true;
-            break;
-        }
-    }
-
-    if (!isHit) {
-        if ((p.cell == 0 && x < blockSize) || (x > p.cell * blockSize && x < (p.cell + 1) * blockSize) || (p.cell == (__k - 1) && x > (__k - 1) * blockSize)) {
-            isHit = true;
-        }
-    }
-
-    if (isHit) {
+    if (((p.id == tar.id || (_fsj && p.id % __k == tar.id % __k)) && tar.notEmpty) || (p.cell == 0 && x < blockSize) || (x > p.cell * blockSize && x < (p.cell + 1) * blockSize) || (p.cell == (__k - 1) && x > (__k - 1) * blockSize)) {
         if (!_gameStart) gameStart();
         if (!_close) createjs.Sound.play("tap");
         
         let groupToKill = p.chordGroup;
         
+        // 如果是多压，自动连带消除同一组的按键（宽容判定）
         do {
             let curP = _gameBBList[_gameBBListIndex];
             let curTar = document.getElementById(curP.id);
@@ -384,11 +372,10 @@ function gameTapEvent(e) {
             _gameScore++;
         } while (
             _gameBBListIndex < _gameBBList.length && 
-            (groupToKill !== -1 && _gameBBList[_gameBBListIndex].chordGroup === groupToKill)
+            (groupToKill !== undefined && _gameBBList[_gameBBListIndex].chordGroup === groupToKill)
         );
 
         gameLayerMoveNextRow();
-        return false;
     } else if (_gameStart && !tar.notEmpty) {
         if (!_close) createjs.Sound.play("err");
         gameOver();
