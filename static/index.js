@@ -14,9 +14,7 @@ document.write('<style type="text/css">' +
     (isDesktop ? '#welcome,#GameTimeLayer,#GameLayerBG,#GameScoreLayer.SHADE{position: absolute;}' :
         '#welcome,#GameTimeLayer,#GameLayerBG,#GameScoreLayer.SHADE{position:fixed;}@media screen and (orientation:landscape) {#landscape {display: box; display: -webkit-box; display: -moz-box; display: -ms-flexbox;}}') +
     '#GameLayerBG { touch-action: none !important; -webkit-user-select: none !important; }' +
-    // ★ 改造：方块改为 bottom/left 锚定 + transform 偏移，避免每次回收触发 layout
-    '.block { position: absolute; left: 0; bottom: 0; }' +
-    '.GameLayer { will-change: transform; }' +
+    '.block.hit { opacity: 0.35; }' +
     '.block.bad { background-color: #d33 !important; }' +
     '</style>');
 
@@ -31,13 +29,16 @@ let _close = false;
 let _fsj = false;
 var url = './static/image/ClickBefore.png';
 
+// ===== 改动：谱面预生成缓冲，保证前方至少还有这么多未点击的方块 =====
+const LOOKAHEAD = 64;
+
 function isplaying() {
     return document.getElementById('welcome').style.display == 'none' &&
         document.getElementById('GameScoreLayer').style.display == 'none' &&
         document.getElementById("setting1").style.display == 'none';
 }
 
-// ===== 修复：__k >= 10 时字符比较失效 =====
+// ===== 改动：修复 __k >= 10 时字符比较失效的问题 =====
 function gl() {
     let tmp = [];
     for (let i = 0; i < key.length; ++i) {
@@ -73,7 +74,7 @@ if (isDesktop) {
 let body, blockSize, GameLayer = [], GameLayerBG, touchArea = [], GameTimeLayer;
 let transform, transitionDuration;
 
-// ===== 改动：pointerdown 优先，直接 e.target，去掉 elementFromPoint =====
+// ===== 改动：改用 pointerdown，直接用 e.target，避免 elementFromPoint 强制布局 =====
 function bindEvents() {
     GameLayerBG.onmousedown = null;
     GameLayerBG.ontouchstart = null;
@@ -139,39 +140,20 @@ function refreshSize() {
 }
 let refreshSizeTime;
 
-// ===== 改动：resize 直接重开，避免 y 错位 =====
+// ===== 改动：resize 直接重开，避免原来的 y 计算错误造成错位 =====
 function _refreshSize() {
     if (!_gameStart && !_gameOver) {
+        countBlockSize();
         gameRestart();
     }
 }
 
-// ===== 改动：countBlockSize 里同步做方块布局，仅在 resize/rebuild 时执行 =====
 function countBlockSize() {
     blockSize = body.offsetWidth / __k;
     body.style.height = window.innerHeight + 'px';
     GameLayerBG.style.height = window.innerHeight + 'px';
     touchArea[0] = window.innerHeight - blockSize * 0;
     touchArea[1] = window.innerHeight - blockSize * 3;
-    layoutBlocks();
-}
-
-// ===== 新增：一次性用 transform 摆放所有方块，之后回收时不再写位置 =====
-function layoutBlocks() {
-    if (!GameLayer || GameLayer.length === 0) return;
-    for (let i = 0; i < GameLayer.length; i++) {
-        let box = GameLayer[i];
-        if (!box || !box.children) continue;
-        let w = blockSize + 'px', h = blockSize + 'px';
-        for (let j = 0; j < box.children.length; j++) {
-            let r = box.children[j];
-            let col = j % __k;
-            let row = Math.floor(j / __k);
-            r.style.width = w;
-            r.style.height = h;
-            r.style[transform] = 'translate3D(' + (col * blockSize) + 'px,' + (-row * blockSize) + 'px,0)';
-        }
-    }
 }
 
 let _gameBBList = [], _gameBBListIndex = 0, _gameOver = false, _gameStart = false, _gameTime, _gameTimeNum, _gameScore, _date1, deviation_time;
@@ -191,7 +173,6 @@ function gameRestart() {
     GameTimeLayer.innerHTML = creatTimeText(_gameTimeNum);
     countBlockSize();
     
-    // 清空所有方块的状态（className 重置会覆盖 tN/bad/hit，但不动 transform）
     for (let i = 0; i < GameLayer.length; i++) {
         let box = GameLayer[i];
         for (let j = 0; j < box.children.length; j++) {
@@ -242,19 +223,24 @@ function creatTimeText(n) {
     return isEnSystem ? '&nbsp;Time Left: ' + n : '&nbsp;剩余时间:' + n;
 }
 
+let _ttreg = / t{1,2}(\d+)/, _clearttClsReg = / t{1,2}\d+| bad| hit/;
+
 function Randomfrom(Min, Max) {
     let Range = Max - Min, Rand = Math.random();
     return Min + Math.round(Rand * Range);
 }
 
-// ===== 改动：randomPos 加 ||0 兜底，last 自增到 len 就回绕 =====
+// ===== 改动：randomPos 内部统一推进 last（D/T/A 由 refreshGameLayer 处理，不进这里）=====
 function randomPos() {
     let x = 0;
     if (key[last] == '!') {
         x = Math.floor(Math.random() * 1000) % __k;
     } else if (key[last] == '@') {
         x = Math.floor(Math.random() * 1000) % __k;
-        if (x == lkey) { x++; if (x == __k) x = 0; }
+        if (x == lkey) {
+            x++;
+            if (x == __k) x = 0;
+        }
     } else if (key[last] == '#') {
         x = lkey;
     } else if (key[last] == '&') {
@@ -290,46 +276,25 @@ function randomPos() {
     return x;
 }
 
-// ===== classList 辅助：清除 tN / ttN / bad / hit =====
-function clearBlockClasses(el) {
-    let toRemove = [];
-    for (let i = 0; i < el.classList.length; i++) {
-        let c = el.classList[i];
-        if (/^t{1,2}\d+$/.test(c) || c === 'bad' || c === 'hit') {
-            toRemove.push(c);
-        }
-    }
-    for (let i = 0; i < toRemove.length; i++) el.classList.remove(toRemove[i]);
-}
-
-// ===== classList 辅助：把 tN 升为 ttN =====
-function promoteToHit(el) {
-    for (let i = 0; i < el.classList.length; i++) {
-        let c = el.classList[i];
-        let m = c.match(/^t(\d+)$/);
-        if (m) {
-            el.classList.remove(c);
-            el.classList.add('tt' + m[1]);
-            return;
-        }
-    }
-}
-
-// ===== 改动：refreshGameLayer 不再写位置（位置由 layoutBlocks 一次做完）=====
+// ===== 改动：逐行判断 D/T/A，每行推进一次 last，修复谱面卡住 =====
 function refreshGameLayer(box, loop, offset) {
     let totalRows = Math.floor(box.children.length / __k);
     let startRow = loop ? 0 : 1;
     let baseGroup = loop ? 100 : 0;
 
-    // 清空状态（只改 class 和 bg，不动 transform）
+    // 清空层
     for (let j = 0; j < box.children.length; j++) {
-        let r = box.children[j];
-        clearBlockClasses(r);
-        r.style.backgroundImage = "none";
+        let r = box.children[j], rstyle = r.style;
+        rstyle.left = (j % __k) * blockSize + 'px';
+        rstyle.bottom = Math.floor(j / __k) * blockSize + 'px';
+        rstyle.width = blockSize + 'px';
+        rstyle.height = blockSize + 'px';
+        rstyle.backgroundImage = "none";
+        r.className = r.className.replace(_clearttClsReg, '');
         r.notEmpty = false;
     }
 
-    // 逐行生成谱面
+    // 逐行生成（每行推进一次 last）
     for (let row = startRow; row < totalRows; row++) {
         let currentKey = key[last];
         let isChordMode = (currentKey === 'D' || currentKey === 'T' || currentKey === 'A');
@@ -353,12 +318,13 @@ function refreshGameLayer(box, loop, offset) {
                 if (r) {
                     _gameBBList.push({ cell: col, id: r.id, hit: false, chordGroup: baseGroup + row });
                     r.style.backgroundImage = "url(" + url + ")";
-                    r.classList.add('t' + (Math.floor(Math.random() * 1000) % (__k + 1) + 1));
+                    r.style.backgroundSize = 'cover';
+                    r.className += ' t' + (Math.floor(Math.random() * 1000) % (__k + 1) + 1);
                     r.notEmpty = true;
                 }
             });
 
-            // ★ 关键修复：和弦行也推进 last
+            // ★ 关键修复：和弦行也必须推进 last，否则谱面卡死
             last++;
             if (last >= len) last = 0;
         } else {
@@ -368,13 +334,14 @@ function refreshGameLayer(box, loop, offset) {
             if (r) {
                 _gameBBList.push({ cell: x, id: r.id, hit: false, chordGroup: undefined });
                 r.style.backgroundImage = "url(" + url + ")";
-                r.classList.add('t' + (Math.floor(Math.random() * 1000) % (__k + 1) + 1));
+                r.style.backgroundSize = 'cover';
+                r.className += ' t' + (Math.floor(Math.random() * 1000) % (__k + 1) + 1);
                 r.notEmpty = true;
             }
         }
     }
 
-    // 层定位（容器级 transform）
+    // 定位
     if (loop) {
         box.style.webkitTransitionDuration = '0ms';
         box.style.display = 'none';
@@ -387,6 +354,7 @@ function refreshGameLayer(box, loop, offset) {
         box.y = 0;
         box.style[transform] = 'translate3D(0,' + box.y + 'px,0)';
     }
+    // ===== 改动：180ms → 80ms，视觉跟手，减少「数据到了但画面没到」的错位 =====
     box.style[transitionDuration] = '80ms';
 }
 
@@ -400,15 +368,14 @@ function gameLayerMoveNextRow() {
             g.style[transform] = 'translate3D(0,' + g.y + 'px,0)';
         }
     }
-    // 定期压缩数组，避免长局内存增长
+    // ===== 改动：定期压缩 _gameBBList，避免长局内存无限增长 =====
     if (_gameBBListIndex > 200) {
-        let keepFrom = Math.max(0, _gameBBListIndex - 1);
-        _gameBBList = _gameBBList.slice(keepFrom);
-        _gameBBListIndex -= keepFrom;
+        _gameBBList = _gameBBList.slice(_gameBBListIndex);
+        _gameBBListIndex = 0;
     }
 }
 
-// ===== 改动：data-hit → 数据层 hit；pad 0.30；谱面空时紧急补货 =====
+// ===== 改动：pad 0.15 → 0.30，data-hit 改数据层，谱面空时紧急补货 =====
 function gameTapEvent(e) {
     if (_gameOver) return false;
 
@@ -420,10 +387,9 @@ function gameTapEvent(e) {
 
     let p = _gameBBList[_gameBBListIndex];
     if (!p) {
-        // 紧急补货：把「已经走到头的层」强制回收
-        let g0 = GameLayer[0], g1 = GameLayer[1];
-        let back = (g0.y > g1.y) ? g0 : g1;   // y 更大的是更早的层
-        if (back.y > 0) refreshGameLayer(back, 1, -1);
+        // 紧急补货：找当前在屏幕上方的层强制回收一次
+        let upper = GameLayer[0].y < GameLayer[1].y ? GameLayer[0] : GameLayer[1];
+        if (upper.y < 0) refreshGameLayer(upper, 1, -1);
         p = _gameBBList[_gameBBListIndex];
         if (!p) return false;
     }
@@ -432,7 +398,7 @@ function gameTapEvent(e) {
     let pad = blockSize * 0.30;
 
     if (!_fsj) {
-        // 横向宽容
+        // 横向宽容判定
         if (x >= p.cell * blockSize - pad && x <= (p.cell + 1) * blockSize + pad) {
             hitIndex = _gameBBListIndex;
         } else if (p.chordGroup !== undefined) {
@@ -446,6 +412,7 @@ function gameTapEvent(e) {
             }
         }
     } else {
+        // 垂直判定：必须点中方块本体
         if (tar.notEmpty) {
             if (p.chordGroup !== undefined) {
                 for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
@@ -465,12 +432,12 @@ function gameTapEvent(e) {
         if (!_close) createjs.Sound.play("tap");
 
         let curP = _gameBBList[hitIndex];
-        if (curP.hit) return false;
+        if (curP.hit) return false;   // 防重复命中（数据层）
         curP.hit = true;
 
         let curTar = document.getElementById(curP.id);
         if (curTar) {
-            promoteToHit(curTar);                     // tN → ttN
+            curTar.className = curTar.className.replace(_ttreg, ' tt$1');
             curTar.style.backgroundImage = "none";
             curTar.notEmpty = false;
         }
@@ -493,7 +460,7 @@ function gameTapEvent(e) {
         }
         return false;
     } else {
-        // 点在目标上方 → 宽容
+        // 点在当前目标方块上方 → 宽容不死
         let currentCat = document.getElementById(p.id);
         if (currentCat) {
             let rect = currentCat.getBoundingClientRect();
@@ -536,19 +503,14 @@ function showWelcomeLayer() {
     l.style.display = 'block';
 }
 
-// ===== 改动：deviation_time 兜底 ≥1；tt 数字用 classList 提取 =====
+// ===== 改动：deviation_time 兜底 ≥1，避免未开局就死时除零 =====
 function showGameScoreLayer() {
     let l = document.getElementById('GameScoreLayer');
     let lastId = _gameBBList[_gameBBListIndex - 1] ? _gameBBList[_gameBBListIndex - 1].id : (_gameBBList[0] ? _gameBBList[0].id : null);
     let c = 1;
     if (lastId) {
-        let el = document.getElementById(lastId);
-        if (el) {
-            for (let i = 0; i < el.classList.length; i++) {
-                let m = el.classList[i].match(/^t{1,2}(\d+)$/);
-                if (m) { c = m[1]; break; }
-            }
-        }
+        let match = document.getElementById(lastId).className.match(_ttreg);
+        if (match) c = match[1];
     }
     l.className = l.className.replace(/bgc\d/, 'bgc' + c);
     document.getElementById('GameScoreLayer-text').innerHTML = hide ? '' : "<span style='color:red;'>" + shareText(_gameScore) + "</span>";
@@ -602,6 +564,7 @@ function backBtn() {
 }
 
 function shareText(score) {
+    // ===== 改动：兜底 ≥1，避免 NaN =====
     deviation_time = Math.max(1, date2.getTime() - (_date1 ? _date1.getTime() : date2.getTime()));
     if (isEnSystem) {
         if (score <= 2.5 * __Time) return 'Keep going! I believe in you!';
@@ -642,7 +605,7 @@ function cookie(name, value, time) {
 
 document.write(createGameLayer());
 
-// ===== 抽出 rebuildGameLayer，复用创建逻辑 =====
+// ===== 改动：抽出 rebuildGameLayer，initSetting 和 save_cookie 共用 =====
 function rebuildGameLayer() {
     let el = document.getElementById('GameLayerBG'), fa = el.parentNode;
     fa.removeChild(el);
@@ -837,4 +800,4 @@ function stair() {
     for (var i = __k; i > 1; --i) key.push(i.toString());
     gl();
     gameRestart();
-        }
+}
