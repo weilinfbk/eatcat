@@ -1,9 +1,9 @@
 // 强制清理旧缓存
-if (!localStorage.getItem('eatcat_v9')) {
+if (!localStorage.getItem('eatcat_v11')) {
     document.cookie.split(";").forEach(function(c) { 
         document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
     });
-    localStorage.setItem('eatcat_v9', 'ok');
+    localStorage.setItem('eatcat_v11', 'ok');
 }
 
 const isEnSystem = navigator.language.toLowerCase().includes('en');
@@ -76,7 +76,6 @@ function init() {
     GameLayer[1].children = GameLayer[1].querySelectorAll('div');
     GameLayerBG = document.getElementById('GameLayerBG');
     
-    // 完美支持多指触控
     if (GameLayerBG.ontouchstart === null) {
         GameLayerBG.addEventListener('touchstart', function(e) {
             e.preventDefault(); 
@@ -153,11 +152,25 @@ function gameInit() {
 
 let last = 0, lkey = 0;
 
+// 【修复重开残留红块的核心点】
 function gameRestart() {
     last = 0; lkey = 0; _gameBBList = []; _gameBBListIndex = 0; _gameScore = 0; _gameOver = false; _gameStart = false;
     _gameTimeNum = __Time;
     GameTimeLayer.innerHTML = creatTimeText(_gameTimeNum);
     countBlockSize();
+    
+    // 强制洗刷所有格子的状态，去除红底和猫猫
+    for (let i = 0; i < GameLayer.length; i++) {
+        let box = GameLayer[i];
+        for (let j = 0; j < box.children.length; j++) {
+            let r = box.children[j];
+            r.className = 'block' + (j % __k ? ' bl' : '');
+            r.style.backgroundImage = "none";
+            r.notEmpty = false;
+            r.removeAttribute('data-hit');
+        }
+    }
+    
     refreshGameLayer(GameLayer[0]);
     refreshGameLayer(GameLayer[1], 1);
 }
@@ -359,21 +372,36 @@ function gameTapEvent(e) {
     
     if (!tar) return false;
 
-    // 1. 屏幕上方区域随便点都不算错，直接无视（没掉下来之前乱按不死）
+    // 1. 屏幕上方的点击一律无视（没掉下来的地方随便点都不会死）
     if (y < touchArea[1]) {
         return false; 
     }
 
-    // 防止多指连按同一个方块
     if (tar.getAttribute && tar.getAttribute('data-hit') === 'true') return false;
 
     let p = _gameBBList[_gameBBListIndex];
     if (!p) return false;
 
     let hitIndex = -1;
+    let clickedCol = -1;
+    if (x >= 0 && x < body.offsetWidth) {
+        clickedCol = Math.floor(x / blockSize);
+    }
 
-    // 2. 开启垂直判定的情况（严格）
-    if (_fsj) {
+    // 2. 判定区逻辑
+    if (!_fsj) {
+        // 没开垂直判定：点对列就算过
+        if (clickedCol === p.cell) {
+            hitIndex = _gameBBListIndex; 
+        } else if (p.chordGroup !== undefined) {
+            for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
+                let cur = _gameBBList[i];
+                if (cur.chordGroup !== p.chordGroup) break;
+                if (cur.cell == clickedCol) { hitIndex = i; break; }
+            }
+        }
+    } else {
+        // 开了垂直判定：必须点中方块本身
         if (tar.notEmpty) {
             if (p.chordGroup !== undefined) {
                 for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
@@ -385,26 +413,8 @@ function gameTapEvent(e) {
                 if (p.id == tar.id) hitIndex = _gameBBListIndex;
             }
         }
-    } 
-    // 3. 没开启垂直判定的情况（宽松，点同一列的空白也算过）
-    else {
-        let clickedCol = -1;
-        if (x >= 0 && x < body.offsetWidth) {
-            clickedCol = Math.floor(x / blockSize);
-        }
-        
-        if (clickedCol === p.cell) {
-            hitIndex = _gameBBListIndex; 
-        } else if (p.chordGroup !== undefined) {
-            for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
-                let cur = _gameBBList[i];
-                if (cur.chordGroup !== p.chordGroup) break;
-                if (cur.cell == clickedCol) { hitIndex = i; break; }
-            }
-        }
     }
 
-    // 4. 成功命中
     if (hitIndex !== -1) {
         if (!_gameStart) gameStart();
         if (!_close) createjs.Sound.play("tap");
@@ -423,7 +433,6 @@ function gameTapEvent(e) {
         }
         _gameScore++;
 
-        // 检查多压是否全部按完
         let allHit = true;
         if (p.chordGroup !== undefined) {
             for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
@@ -444,7 +453,7 @@ function gameTapEvent(e) {
         }
         return false;
     } else {
-        // 5. 没命中任何目标（在判定区点错列或者点错空块），立刻结束
+        // 判定区内没点中，立刻死
         if (!_gameStart) gameStart(); 
         if (!_close) createjs.Sound.play("err");
         gameOver();
