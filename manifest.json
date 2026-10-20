@@ -1,0 +1,21 @@
+{
+  "name": "Eat the Cat (吃掉小猫猫)",
+  "short_name": "Eat the Cat",
+  "description": "Material 3 Rhythm Game",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#141218",
+  "theme_color": "#141218",
+  "icons": [
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
