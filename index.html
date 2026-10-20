@@ -548,13 +548,6 @@ if (installBtn) {
         }
     });
 }
-
-// 监听安装完成事件
-window.addEventListener('appinstalled', () => {
-    console.log('PWA 已成功安装');
-    installBtn.style.display = 'none';
-    deferredPrompt = null;
-});
     </script>
 </body>
 </html>
