@@ -1,9 +1,9 @@
 // 强制清理旧缓存
-if (!localStorage.getItem('eatcata')) {
+if (!localStorage.getItem('eatcat_v8')) {
     document.cookie.split(";").forEach(function(c) { 
         document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
     });
-    localStorage.setItem('eatcata', 'ok');
+    localStorage.setItem('eatcat_v8', 'ok');
 }
 
 const isEnSystem = navigator.language.toLowerCase().includes('en');
@@ -13,6 +13,7 @@ document.write('<style type="text/css">' +
     'html,body {font-size:' + (fontunit < 30 ? fontunit : '30') + 'px;}' +
     (isDesktop ? '#welcome,#GameTimeLayer,#GameLayerBG,#GameScoreLayer.SHADE{position: absolute;}' :
         '#welcome,#GameTimeLayer,#GameLayerBG,#GameScoreLayer.SHADE{position:fixed;}@media screen and (orientation:landscape) {#landscape {display: box; display: -webkit-box; display: -moz-box; display: -ms-flexbox;}}') +
+    '#GameLayerBG { touch-action: none !important; -webkit-user-select: none !important; }' +
     '</style>');
 let map = { 'd': 1, 'f': 2, 'j': 3, 'k': 4 };
 let key = ['!'];
@@ -358,18 +359,24 @@ function gameTapEvent(e) {
     
     if (!tar) return false;
 
-    // 如果没开启垂直判定，且点在了非判定区（上方），直接忽略不判死
-    if (!_fsj && (y > touchArea[0] || y < touchArea[1])) return false;
-
-    // 已经被手指点过的方块不再处理
     if (tar.getAttribute && tar.getAttribute('data-hit') === 'true') return false;
 
     let p = _gameBBList[_gameBBListIndex];
     if (!p) return false;
 
+    // 【关键修复 1】点到空块（没有猫猫）无条件结束游戏！
+    if (!tar.notEmpty) {
+        if (!_gameStart) gameStart(); 
+        if (!_close) createjs.Sound.play("err");
+        gameOver();
+        if (tar.classList && tar.classList.contains('block')) {
+            tar.className += ' bad';
+        }
+        return false;
+    }
+
     let hitIndex = -1;
 
-    // 【绝对严格判定】必须点中实体猫猫！
     if (p.chordGroup !== undefined) {
         for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
             let cur = _gameBBList[i];
@@ -413,8 +420,6 @@ function gameTapEvent(e) {
                     break;
                 }
             }
-        } else {
-            allHit = true;
         }
 
         if (allHit) {
@@ -426,15 +431,10 @@ function gameTapEvent(e) {
 
         return false;
     } else {
-        // 【关键修复】没有命中任何目标猫猫，直接游戏结束！
-        if (!_gameStart) gameStart(); // 确保游戏开始才能结算
-        if (!_close) createjs.Sound.play("err");
-        gameOver();
-        if (tar.classList && tar.classList.contains('block')) {
-            tar.className += ' bad';
-        }
+        // 【关键修复 2】点到了有猫猫的块，但不是当前目标（比如上面还没掉下来的猫猫）
+        // 根据你的要求，这里直接忽略掉，不结束游戏！
+        return false;
     }
-    return false;
 }
 
 function createGameLayer() {
