@@ -49,6 +49,67 @@
             --md-elev-3: 0 1px 3px rgba(0, 0, 0, .30), 0 4px 8px 3px rgba(0, 0, 0, .15);
         }
 
+        /* ---------- 跟随系统自动切换亮色模式 ---------- */
+        @media (prefers-color-scheme: light) {
+            :root {
+                --md-primary: #6750A4;
+                --md-on-primary: #FFFFFF;
+                --md-primary-container: #EADDFF;
+                --md-on-primary-container: #21005D;
+                --md-secondary: #625B71;
+                --md-on-secondary: #FFFFFF;
+                --md-secondary-container: #E8DEF8;
+                --md-on-secondary-container: #1D192B;
+                --md-tertiary-container: #FFD8E4;
+                --md-on-tertiary-container: #31111D;
+                --md-error: #B3261E;
+                --md-on-error: #FFFFFF;
+                --md-surface: #FFFBFE;
+                --md-surface-container-low: #F7F2FA;
+                --md-surface-container: #F3EDF7;
+                --md-surface-container-high: #ECE6F0;
+                --md-surface-container-highest: #E6E0E9;
+                --md-on-surface: #1C1B1F;
+                --md-on-surface-variant: #49454F;
+                --md-outline: #79747E;
+                --md-outline-variant: #CAC4D0;
+            }
+
+            /* 亮色模式下主页卡片和弹窗背景 */
+            .m3-welcome-card {
+                background-color: rgba(255, 255, 255, 0.85);
+                border: 1px solid rgba(0, 0, 0, 0.08);
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            }
+            #GameScoreLayer > .m3-dialog {
+                background-color: rgba(255, 255, 255, 0.95);
+            }
+            .m3-textfield input:hover, .m3-textfield input:focus {
+                background-color: #E6E0E9; /* 亮色输入框悬停 */
+            }
+
+            /* 亮色游戏内背景与网格 */
+            #GameLayerBG {
+                background: radial-gradient(circle at 50% 0%, #ECE6F0 0%, #FFFBFE 80%) !important;
+            }
+            .block {
+                background-color: rgba(0, 0, 0, 0.02) !important;
+                box-shadow: inset 0 0 0 1px rgba(103, 80, 164, 0.1) !important;
+            }
+            .block.bl {
+                background-color: rgba(0, 0, 0, 0.05) !important;
+                box-shadow: inset 0 0 0 1px rgba(103, 80, 164, 0.2) !important;
+            }
+
+            /* 亮色时间胶囊 */
+            #GameTimeLayer {
+                background-color: rgba(255, 255, 255, 0.85) !important;
+                color: var(--md-on-surface) !important;
+                border: 1px solid var(--md-outline-variant) !important;
+                text-shadow: none !important;
+            }
+        }
+
         *, *::before, *::after { box-sizing: border-box; }
         html { font-size: 16px; }
         body {
@@ -150,6 +211,7 @@
             width: calc(100% - 32px); max-width: 560px; margin: 24px auto; padding: 28px 20px 32px; border-radius: var(--md-shape-xl);
             background-color: rgba(33, 31, 38, .82); -webkit-backdrop-filter: blur(24px) saturate(140%); backdrop-filter: blur(24px) saturate(140%);
             box-shadow: var(--md-elev-3); border: 1px solid rgba(147, 143, 153, .16);
+            transition: background-color 0.3s, border-color 0.3s;
         }
 
         #GameScoreLayer > .m3-dialog {
@@ -181,6 +243,7 @@
             background-color: rgba(33, 31, 38, 0.65) !important; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
             border: 1px solid rgba(208, 188, 255, 0.2); border-radius: 999px; color: #FFFFFF; font-family: 'Roboto', 'Noto Sans SC', sans-serif;
             font-size: 1.75rem; font-weight: 700; letter-spacing: 0.1em; text-align: center; pointer-events: none; z-index: 10; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            transition: background-color 0.3s, color 0.3s;
         }
         @keyframes m3-flash {
             0%, 100% { background-color: rgba(33, 31, 38, 0.65); }
