@@ -1,9 +1,9 @@
 // 强制清理旧缓存
-if (!localStorage.getItem('eatcat_v6')) {
+if (!localStorage.getItem('eatcata')) {
     document.cookie.split(";").forEach(function(c) { 
         document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
     });
-    localStorage.setItem('eatcat_v6', 'ok');
+    localStorage.setItem('eatcata', 'ok');
 }
 
 const isEnSystem = navigator.language.toLowerCase().includes('en');
@@ -357,8 +357,11 @@ function gameTapEvent(e) {
     let x = e.clientX - body.offsetLeft;
     
     if (!tar) return false;
+
+    // 如果没开启垂直判定，且点在了非判定区（上方），直接忽略不判死
     if (!_fsj && (y > touchArea[0] || y < touchArea[1])) return false;
 
+    // 已经被手指点过的方块不再处理
     if (tar.getAttribute && tar.getAttribute('data-hit') === 'true') return false;
 
     let p = _gameBBList[_gameBBListIndex];
@@ -366,7 +369,7 @@ function gameTapEvent(e) {
 
     let hitIndex = -1;
 
-    // 多压判定：必须点中组内的目标
+    // 【绝对严格判定】必须点中实体猫猫！
     if (p.chordGroup !== undefined) {
         for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
             let cur = _gameBBList[i];
@@ -377,15 +380,8 @@ function gameTapEvent(e) {
             }
         }
     } else {
-        // 单键判定：点中目标方块，或点中目标列的背景
         if (p.id == tar.id) {
             hitIndex = _gameBBListIndex;
-        } else if (tar === GameLayerBG || (tar.classList && (tar.classList.contains('GameLayer') || tar.id === 'GameLayerBG'))) {
-            if ((p.cell == 0 && x < blockSize) || 
-                (x > p.cell * blockSize && x < (p.cell + 1) * blockSize) || 
-                (p.cell == (__k - 1) && x > (__k - 1) * blockSize)) {
-                hitIndex = _gameBBListIndex;
-            }
         }
     }
 
@@ -430,8 +426,8 @@ function gameTapEvent(e) {
 
         return false;
     } else {
-        // 【关键修复】只要没点中，不管游戏开没开始，直接 GameOver！
-        if (!_gameStart) gameStart(); 
+        // 【关键修复】没有命中任何目标猫猫，直接游戏结束！
+        if (!_gameStart) gameStart(); // 确保游戏开始才能结算
         if (!_close) createjs.Sound.play("err");
         gameOver();
         if (tar.classList && tar.classList.contains('block')) {
