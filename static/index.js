@@ -157,16 +157,52 @@ function countBlockSize() {
 
 let _gameBBList = [], _gameBBListIndex = 0, _gameOver = false, _gameStart = false, _gameTime, _gameTimeNum, _gameScore, _date1, deviation_time;
 
-// ===== 移除 createjs，改用原生 Audio 播放，绝不卡死 =====
 function playAudio(id) {
-    if (_close) return; // 如果设置里关了音效，直接返回
+    if (_close) return;
     try {
         var audio = new Audio('./static/music/' + id + '.mp3');
-        audio.volume = 0.8; // 声音大小
-        audio.play().catch(function(e) {
-            // 浏览器拦截自动播放时静默处理
-        });
+        audio.volume = 0.8;
+        audio.play().catch(function(e) {});
     } catch(e) {}
+}
+
+function playErrorSound() {
+    if (_close) return;
+    playAudio("miss");
+    try {
+        var ctx = new (window.AudioContext || window.webkitAudioContext)();
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(200, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.2);
+    } catch (e) {}
+}
+
+// ===== 强制留下紫色印记 =====
+function makePurple(el) {
+    if (el && el.classList && el.classList.contains('block')) {
+        el.style.boxShadow = 'inset 0 0 0 3px #D0BCFF';
+        el.style.backgroundColor = 'rgba(208, 188, 255, 0.2)';
+    }
+}
+
+// ===== 短暂点亮紫色反馈（用于点错/点空） =====
+function flashPurple(el) {
+    if (el && el.classList && el.classList.contains('block')) {
+        el.style.boxShadow = 'inset 0 0 0 3px #D0BCFF';
+        el.style.backgroundColor = 'rgba(208, 188, 255, 0.2)';
+        setTimeout(function() {
+            el.style.boxShadow = '';
+            el.style.backgroundColor = '';
+        }, 300);
+    }
 }
 
 function gameInit() {
@@ -187,6 +223,8 @@ function gameRestart() {
             let r = box.children[j];
             r.className = 'block' + (j % __k ? ' bl' : '');
             r.style.backgroundImage = "none";
+            r.style.boxShadow = "";
+            r.style.backgroundColor = "";
             r.notEmpty = false;
         }
     }
@@ -221,7 +259,7 @@ function gameTime() {
         GameTimeLayer.innerHTML = isEnSystem ? '&nbsp;&nbsp;&nbsp;&nbsp;Time\'s Up!' : '&nbsp;&nbsp;&nbsp;&nbsp;时间到！';
         gameOver();
         GameLayerBG.className += ' flash';
-        playAudio("end"); // 替换为原生播放
+        playAudio("end");
     } else {
         GameTimeLayer.innerHTML = creatTimeText(_gameTimeNum);
     }
@@ -297,6 +335,8 @@ function refreshGameLayer(box, loop, offset) {
         rstyle.backgroundImage = "none";
         r.className = r.className.replace(_clearttClsReg, '');
         r.notEmpty = false;
+        r.style.boxShadow = "";
+        r.style.backgroundColor = "";
     }
 
     for (let row = startRow; row < totalRows; row++) {
@@ -425,18 +465,24 @@ function gameTapEvent(e) {
 
     if (hitIndex !== -1) {
         if (!_gameStart) gameStart();
-        playAudio("tap"); // 替换为原生播放
+        playAudio("tap");
 
         let curP = _gameBBList[hitIndex];
         if (curP.hit) return false;
         curP.hit = true;
 
         let curTar = document.getElementById(curP.id);
+        // 🌟 核心修复：强效给被吃掉的猫猫上紫色印记
         if (curTar) {
-            curTar.className = curTar.className.replace(_ttreg, ' tt$1');
+            makePurple(curTar); 
             curTar.style.backgroundImage = "none";
             curTar.notEmpty = false;
         }
+        // 🌟 如果玩家因为宽容判定点歪了（比如点到了黄色圈的空地），那个格子也亮一下紫框！
+        if (tar && tar !== curTar) {
+            flashPurple(tar);
+        }
+
         _gameScore++;
 
         let allHit = true;
@@ -459,15 +505,17 @@ function gameTapEvent(e) {
         let currentCat = document.getElementById(p.id);
         if (currentCat) {
             let rect = currentCat.getBoundingClientRect();
-            if (y < rect.top) return false;
+            if (y < rect.top) {
+                flashPurple(tar);
+                return false;
+            }
         }
 
         if (!_gameStart) gameStart();
-        playAudio("miss"); // 原先是 err，你的文件叫 miss 就用 miss
+        playErrorSound();
         gameOver();
-        if (tar.classList && tar.classList.contains('block')) {
-            tar.classList.add('bad');
-        }
+        flashPurple(tar);
+        if (currentCat) currentCat.classList.add('bad');
         return false;
     }
 }
