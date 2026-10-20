@@ -9,14 +9,15 @@ if (!localStorage.getItem('eatcat_v15')) {
 const isEnSystem = navigator.language.toLowerCase().includes('en');
 let isDesktop = navigator['userAgent'].match(/(ipad|iphone|ipod|android|windows phone)/i) ? false : true;
 let fontunit = isDesktop ? 20 : ((window.innerWidth > window.innerHeight ? window.innerHeight : window.innerWidth) / 320) * 10;
-document.write('<style type="text/css">' +
-    'html,body {font-size:' + (fontunit < 30 ? fontunit : '30') + 'px;}' +
+let dynamicStyle = document.createElement('style');
+dynamicStyle.type = 'text/css';
+dynamicStyle.textContent = 'html,body {font-size:' + (fontunit < 30 ? fontunit : '30') + 'px;}' +
     (isDesktop ? '#welcome,#GameTimeLayer,#GameLayerBG,#GameScoreLayer.SHADE{position: absolute;}' :
         '#welcome,#GameTimeLayer,#GameLayerBG,#GameScoreLayer.SHADE{position:fixed;}@media screen and (orientation:landscape) {#landscape {display: box; display: -webkit-box; display: -moz-box; display: -ms-flexbox;}}') +
     '#GameLayerBG { touch-action: none !important; -webkit-user-select: none !important; }' +
     '.block.hit { opacity: 0.35; }' +
-    '.block.bad { background-color: #d33 !important; }' +
-    '</style>');
+    '.block.bad { background-color: #d33 !important; }';
+document.head.appendChild(dynamicStyle);
 
 let map = { 'd': 1, 'f': 2, 'j': 3, 'k': 4 };
 let key = ['!'];
@@ -59,9 +60,11 @@ function gl() {
 }
 
 if (isDesktop) {
-    document.write('<div id="gameBody">');
-    document.onkeydown = function (e) {
-        let key = e.key.toLowerCase();
+    let gameBodyDiv = document.createElement('div');
+    gameBodyDiv.id = 'gameBody';
+    document.body.appendChild(gameBodyDiv);
+        document.onkeydown = function (e) {
+let key = e.key.toLowerCase();
         if (Object.keys(map).indexOf(key) !== -1 && isplaying()) {
             click(map[key]);
         } else if (key == 'r' && document.getElementById('GameScoreLayer').style.display != 'none') {
