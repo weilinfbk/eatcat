@@ -6,8 +6,7 @@
     <title>吃掉小猫猫</title>
     <meta itemprop="name" content="吃掉小猫猫！" />
     <meta itemprop="description" content="新概念音游" />
-    <meta name="viewport"
-        content="initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, width=device-width,target-densitydpi=device-dpi" />
+    <meta name="viewport" content="initial-scale=1, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0, width=device-width,target-densitydpi=device-dpi" />
     <meta name="theme-color" content="#141218" />
     <link rel="icon" href="./eatcat/favicon.ico" type="image/x-icon" />
     <link rel="shortcut icon" href="./eatcat/favicon.ico" type="image/x-icon" />
@@ -22,608 +21,192 @@
             --md-on-primary: #381E72;
             --md-primary-container: #4F378B;
             --md-on-primary-container: #EADDFF;
-
             --md-secondary: #CCC2DC;
             --md-on-secondary: #332D41;
             --md-secondary-container: #4A4458;
             --md-on-secondary-container: #E8DEF8;
-
             --md-tertiary-container: #633B48;
             --md-on-tertiary-container: #FFD8E4;
-
             --md-error: #F2B8B5;
             --md-on-error: #601410;
-
             --md-surface: #141218;
             --md-surface-container-low: #1D1B20;
             --md-surface-container: #211F26;
             --md-surface-container-high: #2B2930;
             --md-surface-container-highest: #36343B;
-
             --md-on-surface: #E6E0E9;
             --md-on-surface-variant: #CAC4D0;
             --md-outline: #938F99;
             --md-outline-variant: #49454F;
-
             --md-shape-xs: 4px;
             --md-shape-sm: 8px;
             --md-shape-md: 12px;
             --md-shape-lg: 16px;
             --md-shape-xl: 28px;
             --md-shape-full: 999px;
-
             --md-elev-1: 0 1px 2px rgba(0, 0, 0, .30), 0 1px 3px 1px rgba(0, 0, 0, .15);
             --md-elev-2: 0 1px 2px rgba(0, 0, 0, .30), 0 2px 6px 2px rgba(0, 0, 0, .15);
             --md-elev-3: 0 1px 3px rgba(0, 0, 0, .30), 0 4px 8px 3px rgba(0, 0, 0, .15);
         }
 
-        /* ---------- 基础重置 ---------- */
-        *, *::before, *::after {
-            box-sizing: border-box;
-        }
-
-        html {
-            font-size: 16px;
-        }
-
+        *, *::before, *::after { box-sizing: border-box; }
+        html { font-size: 16px; }
         body {
-            margin: 0;
-            min-height: 100vh;
-            background-color: var(--md-surface);
+            margin: 0; min-height: 100vh; background-color: var(--md-surface);
             color: var(--md-on-surface);
             font-family: 'Roboto', 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
-            font-size: 1rem;
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
-            -webkit-tap-highlight-color: transparent;
+            font-size: 1rem; line-height: 1.5; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
         }
 
         /* ---------- 滚动条 ---------- */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: var(--md-outline-variant);
-            border-radius: 999px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--md-outline-variant); border-radius: 999px; }
+        ::-webkit-scrollbar-track { background: transparent; }
 
         /* ---------- 按钮：通用 ---------- */
         .m3-btn {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            min-height: 48px;
-            padding: 0 24px;
-            border: none;
-            border-radius: var(--md-shape-full);
-            background: transparent;
-            color: var(--md-primary);
-            font-family: inherit;
-            font-size: .9375rem;
-            font-weight: 500;
-            letter-spacing: .02em;
-            line-height: 1.2;
-            text-align: center;
-            white-space: nowrap;
-            cursor: pointer;
-            overflow: hidden;
-            isolation: isolate;
-            -webkit-user-select: none;
-            user-select: none;
-            transition: box-shadow .2s ease, background-color .2s ease, border-color .2s ease, color .2s ease;
-            outline: none;
+            position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            min-height: 48px; padding: 0 24px; border: none; border-radius: var(--md-shape-full);
+            background: transparent; color: var(--md-primary); font-family: inherit; font-size: .9375rem;
+            font-weight: 500; letter-spacing: .02em; line-height: 1.2; text-align: center; white-space: nowrap;
+            cursor: pointer; overflow: hidden; isolation: isolate; -webkit-user-select: none; user-select: none;
+            transition: box-shadow .2s ease, background-color .2s ease, border-color .2s ease, color .2s ease; outline: none;
         }
-
-        .m3-btn::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: currentColor;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity .15s ease;
-            z-index: -1;
-        }
+        .m3-btn::before { content: ""; position: absolute; inset: 0; background: currentColor; opacity: 0; pointer-events: none; transition: opacity .15s ease; z-index: -1; }
         .m3-btn:hover::before { opacity: .08; }
         .m3-btn:active::before { opacity: .12; }
-        .m3-btn:focus-visible {
-            outline: 3px solid var(--md-primary);
-            outline-offset: 2px;
-        }
-        .m3-btn:disabled {
-            opacity: .38;
-            pointer-events: none;
-        }
+        .m3-btn:focus-visible { outline: 3px solid var(--md-primary); outline-offset: 2px; }
+        .m3-btn:disabled { opacity: .38; pointer-events: none; }
 
-        /* 变体 */
-        .m3-btn-filled {
-            background-color: var(--md-primary);
-            color: var(--md-on-primary);
-            box-shadow: var(--md-elev-1);
-        }
+        .m3-btn-filled { background-color: var(--md-primary); color: var(--md-on-primary); box-shadow: var(--md-elev-1); }
         .m3-btn-filled::before { background: var(--md-on-primary); }
         .m3-btn-filled:hover { box-shadow: var(--md-elev-2); }
-
-        .m3-btn-tonal {
-            background-color: var(--md-secondary-container);
-            color: var(--md-on-secondary-container);
-        }
+        .m3-btn-tonal { background-color: var(--md-secondary-container); color: var(--md-on-secondary-container); }
         .m3-btn-tonal::before { background: var(--md-on-secondary-container); }
+        .m3-btn-outlined { background-color: transparent; color: var(--md-primary); border: 1px solid var(--md-outline); }
+        .m3-btn-text { padding: 0 16px; color: var(--md-primary); }
+        .m3-btn-lg { min-height: 56px; padding: 0 32px; font-size: 1rem; }
+        .m3-btn-block { display: flex; width: 100%; }
+        .m3-btn-group { display: flex; flex-wrap: wrap; gap: 12px; margin: 24px 0 12px; }
+        .m3-btn-group > .m3-btn { flex: 1 1 auto; min-width: 132px; }
+        .m3-btn-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .m3-btn-row-end { justify-content: flex-end; }
 
-        .m3-btn-outlined {
-            background-color: transparent;
-            color: var(--md-primary);
-            border: 1px solid var(--md-outline);
-        }
-
-        .m3-btn-text {
-            padding: 0 16px;
-            color: var(--md-primary);
-        }
-
-        .m3-btn-lg {
-            min-height: 56px;
-            padding: 0 32px;
-            font-size: 1rem;
-        }
-
-        .m3-btn-block {
-            display: flex;
-            width: 100%;
-        }
-
-        .m3-btn-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin: 24px 0 12px;
-        }
-        .m3-btn-group > .m3-btn {
-            flex: 1 1 auto;
-            min-width: 132px;
-        }
-
-        .m3-btn-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 8px;
-        }
-        .m3-btn-row-end {
-            justify-content: flex-end;
-        }
-
-        /* ---------- Chip（筛选芯片） ---------- */
-        .m3-chip-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 12px;
-        }
-
+        /* ---------- Chip ---------- */
+        .m3-chip-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
         .m3-chip {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            height: 40px;
-            padding: 0 16px;
-            border-radius: var(--md-shape-sm);
-            border: 1px solid var(--md-outline-variant);
-            background-color: transparent;
-            color: var(--md-on-surface-variant);
-            font-family: inherit;
-            font-size: .875rem;
-            font-weight: 500;
-            letter-spacing: .01em;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: background-color .2s ease, border-color .2s ease, color .2s ease;
-            outline: none;
-            -webkit-user-select: none;
-            user-select: none;
+            display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 16px;
+            border-radius: var(--md-shape-sm); border: 1px solid var(--md-outline-variant); background-color: transparent;
+            color: var(--md-on-surface-variant); font-family: inherit; font-size: .875rem; font-weight: 500;
+            letter-spacing: .01em; cursor: pointer; white-space: nowrap; transition: background-color .2s ease, border-color .2s ease, color .2s ease;
+            outline: none; -webkit-user-select: none; user-select: none;
         }
-        .m3-chip:hover {
-            background-color: rgba(230, 224, 233, .08);
-            border-color: var(--md-outline);
-        }
-        .m3-chip:active {
-            background-color: rgba(230, 224, 233, .14);
-        }
+        .m3-chip:hover { background-color: rgba(230, 224, 233, .08); border-color: var(--md-outline); }
+        .m3-chip:active { background-color: rgba(230, 224, 233, .14); }
+        .m3-chip:focus-visible { outline: 3px solid var(--md-primary); outline-offset: 2px; }
 
-        /* ---------- 文本框（Filled TextField） ---------- */
-        .m3-textfield {
-            position: relative;
-            margin: 0 0 20px;
-        }
+        /* ---------- TextField ---------- */
+        .m3-textfield { position: relative; margin: 0 0 20px; }
         .m3-textfield input {
-            width: 100%;
-            height: 56px;
-            padding: 24px 16px 8px;
-            border: none;
-            border-bottom: 1px solid var(--md-on-surface-variant);
-            border-radius: var(--md-shape-xs) var(--md-shape-xs) 0 0;
-            background-color: var(--md-surface-container-highest);
-            color: var(--md-on-surface);
-            font-family: inherit;
-            font-size: 1rem;
-            line-height: 1.5;
-            outline: none;
+            width: 100%; height: 56px; padding: 24px 16px 8px; border: none; border-bottom: 1px solid var(--md-on-surface-variant);
+            border-radius: var(--md-shape-xs) var(--md-shape-xs) 0 0; background-color: var(--md-surface-container-highest);
+            color: var(--md-on-surface); font-family: inherit; font-size: 1rem; line-height: 1.5; outline: none;
             transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease;
         }
         .m3-textfield input:hover { background-color: #3E3B44; }
-        .m3-textfield input:focus {
-            border-bottom-color: var(--md-primary);
-            box-shadow: inset 0 -1px 0 0 var(--md-primary);
-            background-color: #3E3B44;
-        }
+        .m3-textfield input:focus { border-bottom-color: var(--md-primary); box-shadow: inset 0 -1px 0 0 var(--md-primary); background-color: #3E3B44; }
         .m3-textfield label {
-            position: absolute;
-            left: 16px;
-            top: 18px;
-            color: var(--md-on-surface-variant);
-            font-size: 1rem;
-            pointer-events: none;
+            position: absolute; left: 16px; top: 18px; color: var(--md-on-surface-variant); font-size: 1rem; pointer-events: none;
             transition: top .15s cubic-bezier(.2, 0, 0, 1), font-size .15s cubic-bezier(.2, 0, 0, 1), color .15s ease;
         }
-        .m3-textfield input:focus + label,
-        .m3-textfield input:not(:placeholder-shown) + label {
-            top: 7px;
-            font-size: .75rem;
-        }
-        .m3-textfield input:focus + label {
-            color: var(--md-primary);
-        }
+        .m3-textfield input:focus + label, .m3-textfield input:not(:placeholder-shown) + label { top: 7px; font-size: .75rem; }
+        .m3-textfield input:focus + label { color: var(--md-primary); }
 
-        /* ---------- 开关（M3 Switch） ---------- */
-        .m3-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 16px;
-            padding: 12px 0;
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-        }
-        .m3-row-text {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            min-width: 0;
-        }
-        .m3-row-title {
-            font-size: .9375rem;
-            font-weight: 500;
-            color: var(--md-on-surface);
-        }
-        .m3-row-sub {
-            font-size: .75rem;
-            color: var(--md-on-surface-variant);
-            line-height: 1.4;
-        }
-        .m3-switch {
-            position: relative;
-            flex: 0 0 auto;
-            display: inline-flex;
-            width: 52px;
-            height: 32px;
-        }
-        .m3-switch input {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            opacity: 0;
-            cursor: pointer;
-            z-index: 2;
-        }
-        .m3-switch-track {
-            position: relative;
-            width: 52px;
-            height: 32px;
-            border-radius: var(--md-shape-full);
-            background-color: var(--md-surface-container-highest);
-            border: 2px solid var(--md-outline);
-            transition: background-color .2s ease, border-color .2s ease;
-        }
-        .m3-switch-thumb {
-            position: absolute;
-            top: 50%;
-            left: 6px;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background-color: var(--md-outline);
-            transform: translateY(-50%);
-            transition: left .2s cubic-bezier(.2, 0, 0, 1), width .2s cubic-bezier(.2, 0, 0, 1), height .2s cubic-bezier(.2, 0, 0, 1), background-color .2s ease;
-        }
-        .m3-switch input:checked + .m3-switch-track {
-            background-color: var(--md-primary);
-            border-color: var(--md-primary);
-        }
-        .m3-switch input:checked + .m3-switch-track .m3-switch-thumb {
-            left: 22px;
-            width: 24px;
-            height: 24px;
-            background-color: var(--md-on-primary);
-        }
+        /* ---------- Switch ---------- */
+        .m3-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 12px 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        .m3-row-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+        .m3-row-title { font-size: .9375rem; font-weight: 500; color: var(--md-on-surface); }
+        .m3-row-sub { font-size: .75rem; color: var(--md-on-surface-variant); line-height: 1.4; }
+        .m3-switch { position: relative; flex: 0 0 auto; display: inline-flex; width: 52px; height: 32px; }
+        .m3-switch input { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; z-index: 2; }
+        .m3-switch-track { position: relative; width: 52px; height: 32px; border-radius: var(--md-shape-full); background-color: var(--md-surface-container-highest); border: 2px solid var(--md-outline); transition: background-color .2s ease, border-color .2s ease; }
+        .m3-switch-thumb { position: absolute; top: 50%; left: 6px; width: 16px; height: 16px; border-radius: 50%; background-color: var(--md-outline); transform: translateY(-50%); transition: left .2s cubic-bezier(.2, 0, 0, 1), width .2s cubic-bezier(.2, 0, 0, 1), height .2s cubic-bezier(.2, 0, 0, 1), background-color .2s ease; }
+        .m3-switch input:checked + .m3-switch-track { background-color: var(--md-primary); border-color: var(--md-primary); }
+        .m3-switch input:checked + .m3-switch-track .m3-switch-thumb { left: 22px; width: 24px; height: 24px; background-color: var(--md-on-primary); }
 
-        /* ---------- 文件上传 ---------- */
         .m3-file-input { display: none !important; }
-
-        /* ---------- 排版 ---------- */
-        .m3-headline {
-            margin: 0;
-            font-size: 1.625rem;
-            font-weight: 500;
-            line-height: 1.3;
-            letter-spacing: 0;
-            color: var(--md-on-surface);
-        }
-        .m3-section-head {
-            display: flex;
-            align-items: baseline;
-            justify-content: space-between;
-            gap: 12px;
-            margin: 0 0 16px;
-        }
-        .m3-section-title {
-            margin: 24px 0 12px;
-            font-size: 1rem;
-            font-weight: 500;
-            letter-spacing: .01em;
-            color: var(--md-primary);
-        }
+        .m3-headline { margin: 0; font-size: 1.625rem; font-weight: 500; line-height: 1.3; letter-spacing: 0; color: var(--md-on-surface); }
+        .m3-section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0 0 16px; }
+        .m3-section-title { margin: 24px 0 12px; font-size: 1rem; font-weight: 500; letter-spacing: .01em; color: var(--md-primary); }
         .m3-section-head .m3-section-title { margin: 0; }
-        .m3-step {
-            font-size: .75rem;
-            color: var(--md-on-surface-variant);
-        }
-        .m3-body {
-            margin: 16px 0;
-            font-size: .9375rem;
-            line-height: 1.7;
-            color: var(--md-on-surface-variant);
-        }
-        .m3-hint {
-            margin: -4px 0 0;
-            font-size: .8125rem;
-            color: var(--md-on-surface-variant);
-        }
-        .m3-banner {
-            margin: 20px 0 0;
-            padding: 12px 16px;
-            border-radius: var(--md-shape-md);
-            background-color: var(--md-tertiary-container);
-            color: var(--md-on-tertiary-container);
-            font-size: .875rem;
-            line-height: 1.6;
-        }
-        .m3-link {
-            display: inline-block;
-            margin-top: 4px;
-            padding: 8px 0;
-            color: var(--md-primary);
-            font-size: .875rem;
-            font-weight: 500;
-            text-decoration: none;
-            border-radius: var(--md-shape-xs);
-        }
+        .m3-step { font-size: .75rem; color: var(--md-on-surface-variant); }
+        .m3-body { margin: 16px 0; font-size: .9375rem; line-height: 1.7; color: var(--md-on-surface-variant); }
+        .m3-hint { margin: -4px 0 0; font-size: .8125rem; color: var(--md-on-surface-variant); }
+        .m3-banner { margin: 20px 0 0; padding: 12px 16px; border-radius: var(--md-shape-md); background-color: var(--md-tertiary-container); color: var(--md-on-tertiary-container); font-size: .875rem; line-height: 1.6; }
+        .m3-link { display: inline-block; margin-top: 4px; padding: 8px 0; color: var(--md-primary); font-size: .875rem; font-weight: 500; text-decoration: none; border-radius: var(--md-shape-xs); }
         .m3-link:hover { text-decoration: underline; }
 
-        /* ---------- 欢迎卡片 ---------- */
         .m3-welcome-card {
-            width: calc(100% - 32px);
-            max-width: 560px;
-            margin: 24px auto;
-            padding: 28px 20px 32px;
-            border-radius: var(--md-shape-xl);
-            background-color: rgba(33, 31, 38, .82);
-            -webkit-backdrop-filter: blur(24px) saturate(140%);
-            backdrop-filter: blur(24px) saturate(140%);
-            box-shadow: var(--md-elev-3);
-            border: 1px solid rgba(147, 143, 153, .16);
+            width: calc(100% - 32px); max-width: 560px; margin: 24px auto; padding: 28px 20px 32px; border-radius: var(--md-shape-xl);
+            background-color: rgba(33, 31, 38, .82); -webkit-backdrop-filter: blur(24px) saturate(140%); backdrop-filter: blur(24px) saturate(140%);
+            box-shadow: var(--md-elev-3); border: 1px solid rgba(147, 143, 153, .16);
         }
 
-        /* ---------- 结算对话框 ---------- */
         #GameScoreLayer > .m3-dialog {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: calc(100% - 48px);
-            max-width: 400px;
-            max-height: calc(100% - 96px);
-            overflow-y: auto;
-            padding: 28px 24px 24px;
-            border-radius: var(--md-shape-xl);
-            background-color: var(--md-surface-container-high);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, .5);
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: calc(100% - 48px); max-width: 400px;
+            max-height: calc(100% - 96px); overflow-y: auto; padding: 28px 24px 24px; border-radius: var(--md-shape-xl);
+            background-color: var(--md-surface-container-high); box-shadow: 0 8px 24px rgba(0, 0, 0, .5);
         }
-        #GameScoreLayer-text {
-            font-size: 1.375rem;
-            font-weight: 500;
-            line-height: 1.35;
-            color: var(--md-on-surface);
-            text-align: center;
-            margin-bottom: 8px;
-        }
-        #GameScoreLayer-score, #GameScoreLayer-bast {
-            font-size: 1rem;
-            line-height: 1.6;
-            color: var(--md-on-surface);
-            text-align: center;
-            padding: 6px 12px;
-            margin-top: 8px;
-            border-radius: var(--md-shape-md);
-            background-color: var(--md-surface-container-highest);
-        }
-        #now, #nosw {
-            font-size: .8125rem;
-            line-height: 1.6;
-            color: var(--md-on-surface-variant);
-            text-align: center;
-            margin-top: 12px;
-        }
+        #GameScoreLayer-text { font-size: 1.375rem; font-weight: 500; line-height: 1.35; color: var(--md-on-surface); text-align: center; margin-bottom: 8px; }
+        #GameScoreLayer-score, #GameScoreLayer-bast { font-size: 1rem; line-height: 1.6; color: var(--md-on-surface); text-align: center; padding: 6px 12px; margin-top: 8px; border-radius: var(--md-shape-md); background-color: var(--md-surface-container-highest); }
+        #now, #nosw { font-size: .8125rem; line-height: 1.6; color: var(--md-on-surface-variant); text-align: center; margin-top: 12px; }
         #GameScoreLayer .m3-btn-row { margin-top: 20px; }
-        #GameScoreLayer .m3-btn-row .m3-btn {
-            flex: 1 1 0;
-            min-width: 0;
-            padding: 0 16px;
-        }
+        #GameScoreLayer .m3-btn-row .m3-btn { flex: 1 1 0; min-width: 0; padding: 0 16px; }
 
-        /* ---------- 响应式 ---------- */
         @media (max-width: 380px) {
             .m3-headline { font-size: 1.375rem; }
             .m3-welcome-card { padding: 24px 16px 28px; }
             .m3-btn-group > .m3-btn { min-width: 0; }
         }
 
-        /* ================= 游戏内画面（Material 3 高级定制版） ================= */
-        #GameLayerBG {
-            background: radial-gradient(circle at 50% 0%, #2B2930 0%, #141218 80%);
-        }
-
-        .block {
-            background-color: rgba(255, 255, 255, 0.015) !important; 
-            box-shadow: inset 0 0 0 1px rgba(208, 188, 255, 0.08) !important;
-            border-radius: 4px !important;
-        }
-
-        .block.bl {
-            background-color: rgba(255, 255, 255, 0.04) !important;
-            box-shadow: inset 0 0 0 1px rgba(208, 188, 255, 0.15) !important;
-        }
-
-        .block[class*="tt"] {
-            background-color: rgba(208, 188, 255, 0.2) !important;
-            box-shadow: inset 0 0 0 2px var(--md-primary) !important;
-        }
-
-        .block.bad {
-            background-color: var(--md-error) !important;
-            box-shadow: inset 0 0 0 2px var(--md-on-error) !important;
-        }
+        /* ================= 游戏内画面 ================= */
+        #GameLayerBG { background: radial-gradient(circle at 50% 0%, #2B2930 0%, #141218 80%); }
+        .block { background-color: rgba(255, 255, 255, 0.015) !important; box-shadow: inset 0 0 0 1px rgba(208, 188, 255, 0.08) !important; border-radius: 4px !important; }
+        .block.bl { background-color: rgba(255, 255, 255, 0.04) !important; box-shadow: inset 0 0 0 1px rgba(208, 188, 255, 0.15) !important; }
+        .block[class*="tt"] { background-color: rgba(208, 188, 255, 0.2) !important; box-shadow: inset 0 0 0 2px var(--md-primary) !important; }
+        .block.bad { background-color: var(--md-error) !important; box-shadow: inset 0 0 0 2px var(--md-on-error) !important; }
 
         #GameTimeLayer {
-            top: 8%; left: 0; right: 0; margin: 0 auto;
-            width: fit-content !important;
-            padding: 12px 32px;
-            background-color: rgba(33, 31, 38, 0.65) !important;
-            -webkit-backdrop-filter: blur(12px);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(208, 188, 255, 0.2);
-            border-radius: 999px;
-            color: #FFFFFF;
-            font-family: 'Roboto', 'Noto Sans SC', sans-serif;
-            font-size: 1.75rem;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            text-align: center;
-            pointer-events: none;
-            z-index: 10;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            top: 8%; left: 0; right: 0; margin: 0 auto; width: fit-content !important; padding: 12px 32px;
+            background-color: rgba(33, 31, 38, 0.65) !important; -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+            border: 1px solid rgba(208, 188, 255, 0.2); border-radius: 999px; color: #FFFFFF; font-family: 'Roboto', 'Noto Sans SC', sans-serif;
+            font-size: 1.75rem; font-weight: 700; letter-spacing: 0.1em; text-align: center; pointer-events: none; z-index: 10; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
         }
-
         @keyframes m3-flash {
             0%, 100% { background-color: rgba(33, 31, 38, 0.65); }
             50% { background-color: var(--md-error); color: var(--md-on-error); border-color: var(--md-error); }
         }
         #GameLayerBG.flash { animation: m3-flash 0.4s ease 3; }
 
-        /* ================= 强制修复按钮和页面溢出 ================= */
+        /* ================= 强制修复样式 ================= */
         #welcome .btn, #welcome .m3-btn, #ready-btn {
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            min-height: 48px !important;
-            padding: 0 24px !important;
-            border-radius: 999px !important;
-            font-family: inherit !important;
-            font-size: 1rem !important;
-            font-weight: 500 !important;
-            border: none !important;
-            outline: none !important;
-            transition: transform 0.1s ease, box-shadow 0.2s ease !important;
-            box-shadow: none;
+            display: inline-flex !important; align-items: center !important; justify-content: center !important;
+            min-height: 48px !important; padding: 0 24px !important; border-radius: 999px !important;
+            font-family: inherit !important; font-size: 1rem !important; font-weight: 500 !important;
+            border: none !important; outline: none !important; transition: transform 0.1s ease, box-shadow 0.2s ease !important; box-shadow: none;
         }
-
         #welcome .btn:active, #welcome .m3-btn:active { transform: scale(0.96); }
-
-        #ready-btn, #welcome .btn-primary {
-            background-color: var(--md-primary) !important;
-            color: var(--md-on-primary) !important;
-            box-shadow: var(--md-elev-1) !important;
-        }
+        #ready-btn, #welcome .btn-primary { background-color: var(--md-primary) !important; color: var(--md-on-primary) !important; box-shadow: var(--md-elev-1) !important; }
         #ready-btn:hover, #welcome .btn-primary:hover { box-shadow: var(--md-elev-2) !important; }
-        #welcome .btn-secondary {
-            background-color: var(--md-secondary-container) !important;
-            color: var(--md-on-secondary-container) !important;
-        }
-
-        #welcome .m3-btn-outlined {
-            background-color: transparent !important;
-            color: var(--md-primary) !important;
-            border: 1px solid var(--md-outline) !important;
-            border-radius: 999px !important;
-            width: 100% !important;
-            margin-top: 8px !important;
-            margin-bottom: 24px !important;
-            padding: 12px 24px !important;
-            font-size: 1rem !important;
-            font-weight: 500 !important;
-            display: flex !important;
-        }
-
-        #welcome .m3-chip {
-            background-color: transparent !important;
-            color: var(--md-on-surface-variant) !important;
-            border: 1px solid var(--md-outline-variant) !important;
-            border-radius: 8px !important;
-            min-height: 40px !important;
-            padding: 0 16px !important;
-            font-size: 0.875rem !important;
-            font-weight: 500 !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            box-shadow: none !important;
-        }
+        #welcome .btn-secondary { background-color: var(--md-secondary-container) !important; color: var(--md-on-secondary-container) !important; }
+        #welcome .m3-btn-outlined { background-color: transparent !important; color: var(--md-primary) !important; border: 1px solid var(--md-outline) !important; border-radius: 999px !important; width: 100% !important; margin-top: 8px !important; margin-bottom: 24px !important; padding: 12px 24px !important; font-size: 1rem !important; font-weight: 500 !important; display: flex !important; }
+        #welcome .m3-chip { background-color: transparent !important; color: var(--md-on-surface-variant) !important; border: 1px solid var(--md-outline-variant) !important; border-radius: 8px !important; min-height: 40px !important; padding: 0 16px !important; font-size: 0.875rem !important; font-weight: 500 !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; box-shadow: none !important; }
         #welcome .m3-chip:hover { background-color: rgba(230, 224, 233, 0.08) !important; }
 
-        /* ================= 解决快速点击闪屏 & 页面溢出 ================= */
-        .GameLayer {
-            will-change: transform;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            transform: translate3d(0, 0, 0);
-            perspective: 1000px;
-        }
-
-        html, body {
-            overflow: hidden !important;
-            height: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            touch-action: none;
-        }
-        #welcome .FILL {
-            overflow-y: auto !important;
-            overflow-x: hidden !important;
-            -webkit-overflow-scrolling: touch;
-        }
-        #GameLayerBG {
-            position: absolute !important;
-            top: 0; left: 0; right: 0; bottom: 0;
-            width: 100vw !important;
-            height: 100vh !important;
-        }
+        .GameLayer { will-change: transform; -webkit-backface-visibility: hidden; backface-visibility: hidden; transform: translate3d(0, 0, 0); perspective: 1000px; }
+        html, body { overflow: hidden !important; height: 100% !important; margin: 0 !important; padding: 0 !important; touch-action: manipulation; }
+        #welcome .FILL { overflow-y: auto !important; overflow-x: hidden !important; -webkit-overflow-scrolling: touch; }
+        #GameLayerBG { position: absolute !important; top: 0; left: 0; right: 0; bottom: 0; width: 100vw !important; height: 100vh !important; }
     </style>
 
     <script src="https://pv.sohu.com/cityjson?ie=utf-8"></script>
@@ -633,9 +216,8 @@
 </head>
 
 <body onLoad="init()" oncontextmenu=self.event.returnValue=false>
-    <!-- ================= 结算层 ================= -->
-    <div id="GameScoreLayer" class="BBOX SHADE bgc1"
-        style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:100;">
+    <!-- 结算层 -->
+    <div id="GameScoreLayer" class="BBOX SHADE bgc1" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:100;">
         <div class="m3-dialog">
             <div id="GameScoreLayer-text"></div>
             <div id="GameScoreLayer-score">得分</div>
@@ -644,29 +226,18 @@
             <div id="nosw">电脑端玩家按下R键可一键重开哦~</div>
             <div class="m3-btn-row">
                 <button type="button" class="m3-btn m3-btn-filled" onclick="replayBtn()">重来</button>
-                <button type="button" class="m3-btn m3-btn-tonal"
-                    onclick="hideGameScoreLayer();showWelcomeLayer();gameRestart()">返回主页</button>
+                <button type="button" class="m3-btn m3-btn-tonal" onclick="hideGameScoreLayer();showWelcomeLayer();gameRestart()">返回主页</button>
             </div>
         </div>
     </div>
 
-    <!-- ================= 欢迎 / 设置层 ================= -->
+    <!-- 欢迎/设置层 -->
     <div id="welcome" class="SHADE BOX-M">
         <div class="welcome-bg FILL"></div>
-
-        <div class="FILL BOX-M"
-            style="position:absolute;top:0;left:0;right:0;bottom:0;z-index:5;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;">
+        <div class="FILL BOX-M" style="position:absolute;top:0;left:0;right:0;bottom:0;z-index:5;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;">
             <div class="m3-welcome-card">
-
-                <!-- 标题 -->
                 <h1 id="tt" class="m3-headline">吃掉小猫猫（支持高度自定义~）</h1>
-
-                <!-- 更新公告 -->
-                <div id="tttt" class="m3-banner">
-                    更新公告：现在可以设置垂直判定啦！
-                </div>
-
-                <!-- 玩法说明 -->
+                <div id="tttt" class="m3-banner">更新公告：现在可以设置垂直判定啦！</div>
                 <div id="ttt" class="m3-body">
                     从最底下小猫猫开始<br />
                     看看您能吃多少猫猫~<br />
@@ -676,18 +247,14 @@
                     可分别控制四个轨道哦！
                 </div>
 
-                <!-- 主操作区 -->
                 <div id="btn_group" style="display: block;">
                     <div class="m3-btn-group">
                         <button type="button" id="ready-btn" class="m3-btn m3-btn-filled m3-btn-lg loading">点击开始</button>
-                        <button type="button" class="m3-btn m3-btn-tonal m3-btn-lg"
-                            onclick="show_setting()">游戏设置</button>
+                        <button type="button" class="m3-btn m3-btn-tonal m3-btn-lg" onclick="show_setting()">游戏设置</button>
                     </div>
-                    <button type="button" class="m3-btn m3-btn-outlined m3-btn-block"
-                        onclick="foreach(); location.reload();">若出现了 bug，点击此按钮后刷新界面</button>
+                    <button type="button" class="m3-btn m3-btn-outlined m3-btn-block" onclick="foreach(); location.reload();">若出现了 bug，点击此按钮后刷新界面</button>
                 </div>
 
-                <!-- 一键键型 -->
                 <div id="btn_group2" style="display: block;">
                     <h2 class="m3-section-title">一键设置特殊键型</h2>
                     <p class="m3-hint">若按键全部消失，请刷新界面</p>
@@ -702,89 +269,62 @@
                     </div>
                 </div>
 
-                <!-- 设置第 1 页 -->
                 <div id="setting1" style="display: none;">
                     <div class="m3-section-head">
                         <h2 class="m3-section-title">基础设置</h2>
                         <span class="m3-step">1 / 2</span>
                     </div>
-
                     <div class="m3-textfield">
                         <input type="text" id="k" class="inputtxt" maxlength="10" placeholder=" ">
                         <label for="k">键数（建议 2~8）</label>
                     </div>
-
                     <div class="m3-textfield">
                         <input type="text" id="keyboard" class="inputtxt" maxlength="99999" placeholder=" ">
                         <label for="keyboard">绑定按键（如 dfjk）</label>
                     </div>
-                    <p class="m3-hint" style="margin-bottom:20px;">
-                        请填写与键数数量相等的英文字母，不区分大小写；手机端可忽略。4K 电脑默认为 DFJK。
-                    </p>
-
+                    <p class="m3-hint" style="margin-bottom:20px;">请填写与键数数量相等的英文字母，不区分大小写；手机端可忽略。4K 电脑默认为 DFJK。</p>
                     <div class="m3-textfield">
                         <input type="text" id="timeinput" class="inputtxt" maxlength="4" placeholder=" ">
                         <label for="timeinput">时间限制（秒）</label>
                     </div>
-
                     <div class="m3-textfield">
                         <input type="text" id="note" class="inputtxt" maxlength="99999" placeholder=" ">
                         <label for="note">键型</label>
                     </div>
-                    <p class="m3-hint" style="margin-bottom:8px;">
-                        键型设置有改动，详细说明请查看文档。
-                    </p>
-                    <a class="m3-link" href="https://weilinfbk.github.io/2026/10/18/%E5%B0%8F%E6%B8%B8%E6%88%8F/" target="_blank">
-                        打开键型说明文档 →
-                    </a>
-
+                    <p class="m3-hint" style="margin-bottom:8px;">键型设置有改动，详细说明请查看文档。</p>
+                    <a class="m3-link" href="https://weilinfbk.github.io/2026/10/18/%E5%B0%8F%E6%B8%B8%E6%88%8F/" target="_blank">打开键型说明文档 →</a>
                     <div class="m3-btn-row m3-btn-row-end" style="margin-top:20px;">
-                        <button type="button" class="m3-btn m3-btn-text"
-                            onclick="show_btn(1);save_cookie();">完成</button>
+                        <button type="button" class="m3-btn m3-btn-text" onclick="show_btn(1);save_cookie();">完成</button>
                         <button type="button" class="m3-btn m3-btn-filled" onclick="nxtpage(1);">下一页</button>
                     </div>
                 </div>
 
-                <!-- 设置第 2 页 -->
                 <div id="setting2" style="display: none;">
                     <div class="m3-section-head">
                         <h2 class="m3-section-title">游玩偏好</h2>
                         <span class="m3-step">2 / 2</span>
                     </div>
-
                     <label class="m3-row">
                         <span class="m3-row-text">
                             <span class="m3-row-title">关闭音效</span>
                             <span class="m3-row-sub">静音所有游戏音效</span>
                         </span>
-                        <span class="m3-switch">
-                            <input type="checkbox" id="close" class="rradio">
-                            <span class="m3-switch-track"><span class="m3-switch-thumb"></span></span>
-                        </span>
+                        <span class="m3-switch"><input type="checkbox" id="close" class="rradio"><span class="m3-switch-track"><span class="m3-switch-thumb"></span></span></span>
                     </label>
-
                     <label class="m3-row">
                         <span class="m3-row-text">
                             <span class="m3-row-title">隐藏结算评语</span>
                             <span class="m3-row-sub">结算后不显示评语文字</span>
                         </span>
-                        <span class="m3-switch">
-                            <input type="checkbox" id="hide" class="rradio">
-                            <span class="m3-switch-track"><span class="m3-switch-thumb"></span></span>
-                        </span>
+                        <span class="m3-switch"><input type="checkbox" id="hide" class="rradio"><span class="m3-switch-track"><span class="m3-switch-thumb"></span></span></span>
                     </label>
-
                     <label class="m3-row">
                         <span class="m3-row-text">
                             <span class="m3-row-title">开启垂直判定</span>
                             <span class="m3-row-sub">按纵向位置判定音符</span>
                         </span>
-                        <span class="m3-switch">
-                            <input type="checkbox" id="fsj" class="rradio">
-                            <span class="m3-switch-track"><span class="m3-switch-thumb"></span></span>
-                        </span>
+                        <span class="m3-switch"><input type="checkbox" id="fsj" class="rradio"><span class="m3-switch-track"><span class="m3-switch-thumb"></span></span></span>
                     </label>
-
                     <h2 class="m3-section-title">自定义按键图片</h2>
                     <div class="m3-row" style="cursor:default;">
                         <span class="m3-row-text">
@@ -792,100 +332,78 @@
                             <span class="m3-row-sub">支持 GIF / PNG / JPG / WebP，可以是动图哦~</span>
                         </span>
                         <span class="u-file-c">
-                            <input id="upload-input" type="file" class="m3-file-input"
-                                accept="image/gif, image/jpg, image/png, image/webp" onchange="showImg(this)" />
+                            <input id="upload-input" type="file" class="m3-file-input" accept="image/gif, image/jpg, image/png, image/webp" onchange="showImg(this)" />
                             <label for="upload-input" class="m3-btn m3-btn-outlined">选择图片</label>
                         </span>
                     </div>
-
                     <div class="m3-btn-row m3-btn-row-end" style="margin-top:20px;">
                         <button type="button" class="m3-btn m3-btn-text" onclick="lstpage(2);">上一页</button>
-                        <button type="button" class="m3-btn m3-btn-filled"
-                            onclick="show_btn(2);save_cookie();">完成</button>
+                        <button type="button" class="m3-btn m3-btn-filled" onclick="show_btn(2);save_cookie();">完成</button>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
 
-    <!-- ================= 自动语言替换脚本 ================= -->
+    <!-- 终极翻译脚本 -->
     <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const settingsBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('游戏设置') || b.innerText.includes('Settings'));
+            const startBtn = document.getElementById('ready-btn');
+            
+            function bindTap(btn, fn) {
+                if(!btn) return;
+                btn.addEventListener('touchstart', (e) => {
+                    e.preventDefault(); 
+                    fn();
+                }, {passive: false});
+                btn.addEventListener('click', fn);
+            }
+            
+            bindTap(settingsBtn, () => { if (typeof show_setting === 'function') show_setting(); });
+            bindTap(startBtn, () => { if (typeof closeWelcomeLayer === 'function') closeWelcomeLayer(); });
+        });
+
         const isEn = navigator.language.toLowerCase().includes('en');
         if (isEn) {
             try {
                 document.title = "Eat the Cat";
+                const translations = {
+                    '吃掉小猫猫（支持高度自定义~）': 'Eat the Cat (Highly Customizable~)',
+                    '更新公告：现在可以设置垂直判定啦！': 'Update: Vertical Judgement is now available!',
+                    '一键设置特殊键型': 'Quick Setup Special Patterns',
+                    '若按键全部消失，请刷新界面': 'If notes disappear, please refresh',
+                    '纯随机': 'Pure Random', '无纵连的随机': 'Random (No Jacks)', '短纵': 'Short Jack',
+                    '全纵连': 'Full Jack', '交互': 'Trill', '楼梯': 'Staircase', '三纵': 'Triple Jack',
+                    '游戏设置': 'Settings', '点击开始': 'Start Game', '若出现了 bug，点击此按钮后刷新界面': 'If bug occurs, click here to refresh',
+                    '基础设置': 'Basic Settings', '键数（建议 2~8）': 'Lane Count (2~8)', '绑定按键（如 dfjk）': 'Bind Keys (e.g., dfjk)',
+                    '时间限制（秒）': 'Time Limit (sec)', '键型': 'Pattern', '游玩偏好': 'Preferences',
+                    '关闭音效': 'Mute Sound', '隐藏结算评语': 'Hide Result Comments', '开启垂直判定': 'Enable Vertical Judgement',
+                    '自定义按键图片': 'Custom Note Image', '选择图片': 'Choose Image', '上一页': 'Prev', '下一页': 'Next',
+                    '完成': 'Done', '得分': 'Score', '最佳': 'Best', '电脑端玩家按下R键可一键重开哦~': "PC players press 'R' to restart",
+                    '重来': 'Retry', '返回主页': 'Home'
+                };
+
+                const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+                let node;
+                while(node = walk.nextNode()) {
+                    let text = node.nodeValue.trim();
+                    if (translations[text]) node.nodeValue = node.nodeValue.replace(text, translations[text]);
+                }
                 
-                // 主页标题与说明
-                if (document.getElementById('tt')) document.getElementById('tt').innerText = "Eat the Cat (Highly Customizable~)";
-                if (document.getElementById('tttt')) document.getElementById('tttt').innerText = "Update: Vertical Judgement is now available!";
-                if (document.getElementById('ttt')) document.getElementById('ttt').innerHTML = "Start from the bottom cat.<br>See how many cats you can eat~<br>Note: There are many goodies in the settings!<br>PC players under default settings<br>Press DFJK keys on keyboard<br>to control the four lanes respectively!";
+                const ttt = document.getElementById('ttt');
+                if(ttt) ttt.innerHTML = "Start from the bottom cat.<br>See how many cats you can eat~<br>Note: There are many goodies in the settings!<br>PC players under default settings<br>Press DFJK keys on keyboard<br>to control the four lanes respectively!";
                 
-                // 主页按钮
-                if (document.getElementById('ready-btn')) document.getElementById('ready-btn').innerText = "Start Game";
-                
-                // 遍历所有按钮进行翻译
-                document.querySelectorAll('#welcome button').forEach(btn => {
-                    const text = btn.innerText.trim();
-                    if (text.includes('游戏设置')) btn.innerText = 'Settings';
-                    if (text.includes('若出现了')) btn.innerText = 'If bug occurs, click here to refresh';
-                    if (text === '纯随机') btn.innerText = 'Pure Random';
-                    if (text === '无纵连的随机') btn.innerText = 'Random (No Jacks)';
-                    if (text === '短纵') btn.innerText = 'Short Jack';
-                    if (text === '全纵连') btn.innerText = 'Full Jack';
-                    if (text === '交互') btn.innerText = 'Trill';
-                    if (text === '楼梯') btn.innerText = 'Staircase';
-                    if (text === '三纵') btn.innerText = 'Triple Jack';
-                    if (text === '完成') btn.innerText = 'Done';
-                    if (text === '下一页') btn.innerText = 'Next';
-                    if (text === '上一页') btn.innerText = 'Prev';
-                    if (text === '重来') btn.innerText = 'Retry';
-                    if (text === '返回主页') btn.innerText = 'Home';
-                });
-
-                // 补全图1中没翻译的标题和小字
-                document.querySelectorAll('#welcome h2').forEach(h2 => {
-                    if (h2.innerText.includes('一键设置特殊键型')) h2.innerText = 'Quick Setup Special Patterns';
-                    if (h2.innerText.includes('基础设置')) h2.innerText = 'Basic Settings';
-                    if (h2.innerText.includes('游玩偏好')) h2.innerText = 'Preferences';
-                    if (h2.innerText.includes('自定义按键图片')) h2.innerText = 'Custom Note Image';
-                });
-
-                document.querySelectorAll('#welcome p').forEach(p => {
-                    if (p.innerText.includes('若按键全部消失')) p.innerText = 'If notes disappear, please refresh';
-                    if (p.innerText.includes('请填写与键数')) p.innerText = 'Fill in English letters equal to lane count. Default 4K is DFJK.';
-                    if (p.innerText.includes('键型设置有改动')) p.innerText = 'Pattern settings updated, check the docs.';
-                });
-
-                document.querySelectorAll('#welcome a').forEach(a => {
-                    if (a.innerText.includes('打开键型说明文档')) a.innerText = 'Open Pattern Documentation →';
-                });
-
-                // 翻译输入框的浮动标签
-                document.querySelectorAll('#welcome label').forEach(label => {
-                    const text = label.innerText;
-                    if (text.includes('键数')) label.innerText = 'Lane Count';
-                    if (text.includes('绑定按键')) label.innerText = 'Bind Keys';
-                    if (text.includes('时间限制')) label.innerText = 'Time Limit';
-                    if (text.includes('键型')) label.innerText = 'Pattern';
-                    if (text.includes('关闭音效')) label.innerText = 'Mute Sound';
-                    if (text.includes('隐藏结算评语')) label.innerText = 'Hide Result Comments';
-                    if (text.includes('开启垂直判定')) label.innerText = 'Enable Vertical Judgement';
-                    if (text.includes('选择图片')) label.innerText = 'Choose Image';
-                });
-                
-                // 结算界面的文字
-                if (document.getElementById('GameScoreLayer-score')) document.getElementById('GameScoreLayer-score').innerText = "Score";
-                if (document.getElementById('GameScoreLayer-bast')) document.getElementById('GameScoreLayer-bast').innerText = "Best";
-                if (document.getElementById('now')) document.getElementById('now').innerText = "Pattern";
-                if (document.getElementById('nosw')) document.getElementById('nosw').innerText = "PC players press 'R' to restart";
-
-            } catch (error) {
-                console.error("翻译脚本报错，但这不会影响游戏运行: ", error);
-            }
+                const hint = document.querySelector('p.m3-hint[style*="margin-bottom:20px;"]');
+                if(hint) hint.innerText = "Fill in English letters equal to lane count. Mobile can ignore. Default 4K is DFJK.";
+                const hint2 = document.querySelector('p.m3-hint[style*="margin-bottom:8px;"]');
+                if(hint2) hint2.innerText = "Pattern settings updated, check the docs.";
+                const link = document.querySelector('.m3-link');
+                if(link) link.innerText = "Open Pattern Documentation →";
+                const sub = document.querySelector('.m3-row-sub');
+                if(sub && sub.innerText.includes('支持')) sub.innerText = "Supports GIF / PNG / JPG / WebP";
+            } catch (e) { console.error(e); }
         }
     </script>
 </body>
-</body>
-
 </html>
