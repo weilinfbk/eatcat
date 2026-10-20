@@ -1,5 +1,6 @@
-```markdown
 # Eat the Cat - Material 3 Edition
+**[中文](README.md) | [English](README.en.md)**
+
 
 This project is a fork of [122440367/eatcat](https://github.com/122440367/eatcat). While preserving the core gameplay (a neo-concept rhythm game) and underlying logic, this version features a comprehensive **Material Design 3 (M3)** visual overhaul, UX optimizations, and internationalization (i18n).
 
