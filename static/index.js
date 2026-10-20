@@ -1,9 +1,9 @@
 // 强制清理旧缓存
-if (!localStorage.getItem('eatcat_v13')) {
+if (!localStorage.getItem('eatcat_v14')) {
     document.cookie.split(";").forEach(function(c) { 
         document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
     });
-    localStorage.setItem('eatcat_v13', 'ok');
+    localStorage.setItem('eatcat_v14', 'ok');
 }
 
 const isEnSystem = navigator.language.toLowerCase().includes('en');
@@ -63,6 +63,34 @@ if (isDesktop) {
 let body, blockSize, GameLayer = [], GameLayerBG, touchArea = [], GameTimeLayer;
 let transform, transitionDuration;
 
+function handleTouchStart(e) {
+    e.preventDefault(); 
+    for (let i = 0; i < e.changedTouches.length; i++) {
+        let touch = e.changedTouches[i];
+        let elem = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (elem) {
+            gameTapEvent({
+                target: elem,
+                clientX: touch.clientX,
+                clientY: touch.clientY
+            });
+        }
+    }
+}
+
+function bindEvents() {
+    GameLayerBG.ontouchstart = null;
+    GameLayerBG.onmousedown = null;
+    GameLayerBG.removeEventListener('touchstart', handleTouchStart);
+    GameLayerBG.removeEventListener('mousedown', gameTapEvent);
+
+    if ('ontouchstart' in window) {
+        GameLayerBG.addEventListener('touchstart', handleTouchStart, { passive: false });
+    } else {
+        GameLayerBG.onmousedown = gameTapEvent;
+    }
+}
+
 function init() {
     showWelcomeLayer();
     body = document.getElementById('gameBody') || document.body;
@@ -76,24 +104,7 @@ function init() {
     GameLayer[1].children = GameLayer[1].querySelectorAll('div');
     GameLayerBG = document.getElementById('GameLayerBG');
     
-    if (GameLayerBG.ontouchstart === null) {
-        GameLayerBG.addEventListener('touchstart', function(e) {
-            e.preventDefault(); 
-            for (let i = 0; i < e.changedTouches.length; i++) {
-                let touch = e.changedTouches[i];
-                let elem = document.elementFromPoint(touch.clientX, touch.clientY);
-                if (elem) {
-                    gameTapEvent({
-                        target: elem,
-                        clientX: touch.clientX,
-                        clientY: touch.clientY
-                    });
-                }
-            }
-        }, { passive: false });
-    } else {
-        GameLayerBG.onmousedown = gameTapEvent;
-    }
+    bindEvents();
 
     gameInit();
     initSetting();
@@ -381,7 +392,6 @@ function gameTapEvent(e) {
         clickedCol = Math.floor(x / blockSize);
     }
 
-    // 判定命中逻辑
     if (!_fsj) {
         if (clickedCol === p.cell) {
             hitIndex = _gameBBListIndex; 
@@ -407,7 +417,6 @@ function gameTapEvent(e) {
     }
 
     if (hitIndex !== -1) {
-        // 成功命中
         if (!_gameStart) gameStart();
         if (!_close) createjs.Sound.play("tap");
         
@@ -445,19 +454,16 @@ function gameTapEvent(e) {
         }
         return false;
     } else {
-        // 【核心修复：用户的红黄圈逻辑】
-        // 获取当前真正的目标猫猫在屏幕上的位置
+        // 【红黄圈判定逻辑】：如果手指点在当前目标方块的上方，绝对不死
         let currentCat = document.getElementById(p.id);
         if (currentCat) {
             let rect = currentCat.getBoundingClientRect();
-            // 如果手指点击的 Y 坐标，比当前目标猫猫的最高点还要高（在目标上面）
-            // 那么不管点的是猫猫还是空白，一律无视，绝对不能死！
             if (y < rect.top) {
                 return false;
             }
         }
 
-        // 如果点在了下方（目标猫猫所在排或更低），却点错了，才会死
+        // 判定区内没点中，立刻死
         if (!_gameStart) gameStart(); 
         if (!_close) createjs.Sound.play("err");
         gameOver();
@@ -606,11 +612,7 @@ function initSetting() {
             GameLayer.push(document.getElementById('GameLayer2'));
             GameLayer[1].children = GameLayer[1].querySelectorAll('div');
             GameLayerBG = document.getElementById('GameLayerBG');
-            if (GameLayerBG.ontouchstart === null) {
-                GameLayerBG.ontouchstart = gameTapEvent;
-            } else {
-                GameLayerBG.onmousedown = gameTapEvent;
-            }
+            bindEvents();
         }
     }
     if (cookie('time')) {
@@ -696,11 +698,7 @@ function save_cookie() {
         GameLayer.push(document.getElementById('GameLayer2'));
         GameLayer[1].children = GameLayer[1].querySelectorAll('div');
         GameLayerBG = document.getElementById('GameLayerBG');
-        if (GameLayerBG.ontouchstart === null) {
-            GameLayerBG.ontouchstart = gameTapEvent;
-        } else {
-            GameLayerBG.onmousedown = gameTapEvent;
-        }
+        bindEvents();
     }
 
     map = {};
