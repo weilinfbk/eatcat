@@ -1,9 +1,9 @@
 // 强制清理旧缓存
-if (!localStorage.getItem('eatcat_v3')) {
+if (!localStorage.getItem('eatcat_v4')) {
     document.cookie.split(";").forEach(function(c) { 
         document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
     });
-    localStorage.setItem('eatcat_v3', 'ok');
+    localStorage.setItem('eatcat_v4', 'ok');
 }
 
 const isEnSystem = navigator.language.toLowerCase().includes('en');
@@ -75,21 +75,19 @@ function init() {
     GameLayer[1].children = GameLayer[1].querySelectorAll('div');
     GameLayerBG = document.getElementById('GameLayerBG');
     
-    // 【核心修复】重写触摸监听，支持多指同时按下
+    // 完美支持多点触控
     if (GameLayerBG.ontouchstart === null) {
         GameLayerBG.addEventListener('touchstart', function(e) {
-            e.preventDefault(); // 阻止屏幕缩放和滚动
-            // 遍历所有按下的手指
+            e.preventDefault(); 
             for (let i = 0; i < e.changedTouches.length; i++) {
                 let touch = e.changedTouches[i];
                 let elem = document.elementFromPoint(touch.clientX, touch.clientY);
                 if (elem) {
-                    let fakeEvent = {
+                    gameTapEvent({
                         target: elem,
                         clientX: touch.clientX,
                         clientY: touch.clientY
-                    };
-                    gameTapEvent(fakeEvent);
+                    });
                 }
             }
         }, { passive: false });
@@ -206,7 +204,6 @@ function Randomfrom(Min, Max) {
     return Min + Math.round(Rand * Range);
 }
 
-// 纯粹的原版单键位置生成（没改动）
 function randomPos() {
     let x = 0;
     if (key[last] == '!') {
@@ -254,13 +251,11 @@ function randomPos() {
     return x;
 }
 
-// 多压模式专用生成（不走原版）
 function refreshGameLayer(box, loop, offset) {
     let currentKey = key[last];
     let isChordMode = (currentKey === 'D' || currentKey === 'T' || currentKey === 'A');
 
     if (isChordMode) {
-        // 【多压模式铺满】
         let startRow = loop ? 0 : 1;
         let totalRows = Math.floor(box.children.length / __k);
         
@@ -273,6 +268,7 @@ function refreshGameLayer(box, loop, offset) {
             rstyle.backgroundImage = "none";
             r.className = r.className.replace(_clearttClsReg, '');
             r.notEmpty = false;
+            r.removeAttribute('data-hit');
         }
 
         for (let row = startRow; row < totalRows; row++) {
@@ -292,7 +288,7 @@ function refreshGameLayer(box, loop, offset) {
                 let targetJ = row * __k + col;
                 let r = box.children[targetJ];
                 if(r) {
-                    _gameBBList.push({ cell: col, id: r.id, isChord: true, chordGroup: row + (loop ? 100 : 0) });
+                    _gameBBList.push({ cell: col, id: r.id, hit: false, chordGroup: row + (loop ? 100 : 0) });
                     r.style.backgroundImage = "url(" + url + ")";
                     r.style.backgroundSize = 'cover';
                     r.className += ' t' + (Math.floor(Math.random() * 1000) % (__k + 1) + 1);
@@ -301,7 +297,6 @@ function refreshGameLayer(box, loop, offset) {
             });
         }
     } else {
-        // 【原版单键模式铺满】
         let i = randomPos() + (loop ? 0 : __k);
         for (let j = 0; j < box.children.length; j++) {
             let r = box.children[j], rstyle = r.style;
@@ -311,8 +306,9 @@ function refreshGameLayer(box, loop, offset) {
             rstyle.height = blockSize + 'px';
             rstyle.backgroundImage = "none";
             r.className = r.className.replace(_clearttClsReg, '');
+            r.removeAttribute('data-hit');
             if (i == j) {
-                _gameBBList.push({ cell: i % __k, id: r.id, isChord: false });
+                _gameBBList.push({ cell: i % __k, id: r.id, hit: false, chordGroup: undefined });
                 rstyle.backgroundImage = "url(" + url + ")";
                 rstyle.backgroundSize = 'cover';
                 r.className += ' t' + (Math.floor(Math.random() * 1000) % (__k + 1) + 1);
@@ -353,44 +349,43 @@ function gameLayerMoveNextRow() {
     }
 }
 
-// 【核心修复】完美支持多指点击的判定逻辑
 function gameTapEvent(e) {
     if (_gameOver) return false;
-    
     let tar = e.target;
+    if (!tar || !tar.classList.contains('block')) return false;
+    
     let y = e.clientY;
     let x = e.clientX - body.offsetLeft;
-        
     if (!_fsj && (y > touchArea[0] || y < touchArea[1])) return false;
 
-    // 如果这个方块在之前已经被另一个手指点掉了，直接无视这次点击
-    if (!tar.notEmpty) {
-        return false;
-    }
+    // 如果这个方块已经被点过了
+    if (tar.getAttribute('data-hit') === 'true') return false;
 
     let p = _gameBBList[_gameBBListIndex];
     if (!p) return false;
 
     let hitIndex = -1;
 
-    // 判定是否命中
-    if (((p.id == tar.id || (_fsj && p.id % __k == tar.id % __k))) || 
-        (p.cell == 0 && x < blockSize) || 
-        (x > p.cell * blockSize && x < (p.cell + 1) * blockSize) || 
-        (p.cell == (__k - 1) && x > (__k - 1) * blockSize)) {
-        hitIndex = _gameBBListIndex;
-    } 
-    // 多押判定
-    else if (p.chordGroup !== undefined) {
-        for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
-            if (_gameBBList[i].chordGroup === p.chordGroup) {
-                if (_gameBBList[i].id === tar.id) {
-                    hitIndex = i;
-                    break;
-                }
-            } else {
-                break;
-            }
+    // 在接下来的几个（当前组）找是不是匹配
+    for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
+        let cur = _gameBBList[i];
+        if (cur.id == tar.id) {
+            hitIndex = i;
+            break;
+        }
+        // 如果已经跨越了当前组，就停止查找
+        if (cur.chordGroup !== undefined && p.chordGroup !== undefined && cur.chordGroup !== p.chordGroup) {
+            break;
+        }
+    }
+
+    // 兼容单键模式的区域点击
+    if (hitIndex === -1 && p.chordGroup === undefined) {
+        if (((p.id == tar.id || (_fsj && p.id % __k == tar.id % __k))) || 
+            (p.cell == 0 && x < blockSize) || 
+            (x > p.cell * blockSize && x < (p.cell + 1) * blockSize) || 
+            (p.cell == (__k - 1) && x > (__k - 1) * blockSize)) {
+            hitIndex = _gameBBListIndex;
         }
     }
 
@@ -398,27 +393,39 @@ function gameTapEvent(e) {
         if (!_gameStart) gameStart();
         if (!_close) createjs.Sound.play("tap");
         
-        let groupToKill = _gameBBList[hitIndex].chordGroup;
+        tar.setAttribute('data-hit', 'true'); 
+        let curP = _gameBBList[hitIndex];
+        curP.hit = true; 
         
-        // 连带消除同组
-        do {
-            let curP = _gameBBList[_gameBBListIndex];
-            let curTar = document.getElementById(curP.id);
-            if (curTar) {
-                curTar.className = curTar.className.replace(_ttreg, ' tt$1');
-                curTar.style.backgroundImage = "none";
-                curTar.notEmpty = false;
-            }
-            _gameBBListIndex++;
-            _gameScore++;
-        } while (
-            _gameBBListIndex < _gameBBList.length && 
-            (groupToKill !== undefined && _gameBBList[_gameBBListIndex].chordGroup === groupToKill)
-        );
+        let curTar = document.getElementById(curP.id);
+        if (curTar) {
+            curTar.className = curTar.className.replace(_ttreg, ' tt$1');
+            curTar.style.backgroundImage = "none";
+            curTar.notEmpty = false;
+        }
+        _gameScore++;
 
-        gameLayerMoveNextRow();
+        // 检查这一组是不是全被点完了
+        let allHit = true;
+        if (p.chordGroup !== undefined) {
+            for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
+                let cur = _gameBBList[i];
+                if (cur.chordGroup !== p.chordGroup) break;
+                if (!cur.hit) allHit = false;
+            }
+        } else {
+            allHit = true;
+        }
+
+        if (allHit) {
+            while (_gameBBListIndex < _gameBBList.length && _gameBBList[_gameBBListIndex].hit) {
+                _gameBBListIndex++;
+            }
+            gameLayerMoveNextRow();
+        }
+
+        return false;
     } else {
-        // 点错
         if (_gameStart) {
             if (!_close) createjs.Sound.play("err");
             gameOver();
@@ -456,7 +463,9 @@ function showWelcomeLayer() {
 
 function showGameScoreLayer() {
     let l = document.getElementById('GameScoreLayer');
-    let c = document.getElementById(_gameBBList[_gameBBListIndex - 1].id).className.match(_ttreg)[1];
+    let lastId = _gameBBList[_gameBBListIndex - 1] ? _gameBBList[_gameBBListIndex - 1].id : _gameBBList[0].id;
+    let match = document.getElementById(lastId).className.match(_ttreg);
+    let c = match ? match[1] : 1;
     l.className = l.className.replace(/bgc\d/, 'bgc' + c);
     document.getElementById('GameScoreLayer-text').innerHTML = hide ? '' : "<span style='color:red;'>" + shareText(_gameScore) + "</span>";
     
