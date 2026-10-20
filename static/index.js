@@ -1,3 +1,11 @@
+// 强制清理可能存在的旧版本坏键型缓存
+if (!localStorage.getItem('eatcat_v1')) {
+    document.cookie.split(";").forEach(function(c) { 
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+    });
+    localStorage.setItem('eatcat_v1', 'ok');
+}
+
 const isEnSystem = navigator.language.toLowerCase().includes('en');
 let isDesktop = navigator['userAgent'].match(/(ipad|iphone|ipod|android|windows phone)/i) ? false : true;
 let fontunit = isDesktop ? 20 : ((window.innerWidth > window.innerHeight ? window.innerHeight : window.innerWidth) / 320) * 10;
@@ -189,7 +197,6 @@ function Randomfrom(Min, Max) {
     return Min + Math.round(Rand * Range);
 }
 
-// 修复死循环的多压随机位置生成
 function randomPos() {
     let x = 0;
     let posArray = [];
@@ -207,13 +214,10 @@ function randomPos() {
     } else if (key[last] == 'A' && __k >= 4) {
         for (let i = 0; i < __k; i++) posArray.push(i);
     } else {
-        // 处理单键（如果键数不够触发多压，自动降级为随机单键）
         if (key[last] == 'D' || key[last] == 'T' || key[last] == 'A') {
             x = Math.floor(Math.random() * 1000) % __k;
         } else if (key[last] == '!') {
             x = Math.floor(Math.random() * 1000) % __k;
-            let pos = last - 1;
-            if (pos == -1) pos = len - 1;
         } else if (key[last] == '@') {
             x = Math.floor(Math.random() * 1000) % __k;
             if (x == lkey) {
@@ -246,8 +250,10 @@ function randomPos() {
             x = nums[Randomfrom(0, l - 1)];
         } else {
             x = parseInt(key[last]) - 1;
-            if (isNaN(x) || x < 0 || x >= __k) x = 0; // 防错保护
         }
+        
+        // 强制容错，防止 NaN 导致游戏卡死
+        if (isNaN(x) || x < 0 || x >= __k) x = 0;
         posArray = [x];
     }
 
@@ -332,40 +338,54 @@ function gameTapEvent(e) {
         x = (e.clientX || e.targetTouches[0].clientX) - body.offsetLeft,
         p = _gameBBList[_gameBBListIndex];
 
-    if (!p) return false; // 保护越界
-
+    if (!p) return false;
     if (!_fsj && (y > touchArea[0] || y < touchArea[1])) return false;
 
-    if (((p.id == tar.id || (_fsj && p.id % __k == tar.id % __k)) && tar.notEmpty) || (p.cell == 0 && x < blockSize) || (x > p.cell * blockSize && x < (p.cell + 1) * blockSize) || (p.cell == (__k - 1) && x > (__k - 1) * blockSize)) {
+    // 查找到底点中了哪个按键（支持多压的任意一个）
+    let isHit = false;
+    for (let i = _gameBBListIndex; i < Math.min(_gameBBListIndex + 4, _gameBBList.length); i++) {
+        let cur = _gameBBList[i];
+        if (cur.id == tar.id && tar.notEmpty) {
+            isHit = true;
+            break;
+        }
+        if (p.chordGroup !== -1 && cur.chordGroup === p.chordGroup && tar.notEmpty) {
+            isHit = true;
+            break;
+        }
+    }
+
+    // 如果没点到实体，点到了大致区域也算
+    if (!isHit) {
+        if ((p.cell == 0 && x < blockSize) || (x > p.cell * blockSize && x < (p.cell + 1) * blockSize) || (p.cell == (__k - 1) && x > (__k - 1) * blockSize)) {
+            isHit = true;
+        }
+    }
+
+    if (isHit) {
         if (!_gameStart) gameStart();
         if (!_close) createjs.Sound.play("tap");
         
-        tar = document.getElementById(p.id);
-        if(tar) {
-            tar.className = tar.className.replace(_ttreg, ' tt$1');
-            tar.style.backgroundImage = "none";
-            tar.notEmpty = false;
-        }
+        let groupToKill = p.chordGroup;
         
-        _gameBBListIndex++;
-        _gameScore++;
-
-        // 宽容多压判定（加了安全检查，防止数组越界）
-        if (p.chordGroup !== -1) {
-            while (_gameBBListIndex < _gameBBList.length && _gameBBList[_gameBBListIndex] && _gameBBList[_gameBBListIndex].chordGroup === p.chordGroup) {
-                let nextP = _gameBBList[_gameBBListIndex];
-                let nextTar = document.getElementById(nextP.id);
-                if (nextTar) {
-                    nextTar.className = nextTar.className.replace(_ttreg, ' tt$1');
-                    nextTar.style.backgroundImage = "none";
-                    nextTar.notEmpty = false;
-                }
-                _gameBBListIndex++;
-                _gameScore++;
+        // 消除当前及同组按键
+        do {
+            let curP = _gameBBList[_gameBBListIndex];
+            let curTar = document.getElementById(curP.id);
+            if (curTar) {
+                curTar.className = curTar.className.replace(_ttreg, ' tt$1');
+                curTar.style.backgroundImage = "none";
+                curTar.notEmpty = false;
             }
-        }
+            _gameBBListIndex++;
+            _gameScore++;
+        } while (
+            _gameBBListIndex < _gameBBList.length && 
+            (groupToKill !== -1 && _gameBBList[_gameBBListIndex].chordGroup === groupToKill)
+        );
 
         gameLayerMoveNextRow();
+        return false;
     } else if (_gameStart && !tar.notEmpty) {
         if (!_close) createjs.Sound.play("err");
         gameOver();
