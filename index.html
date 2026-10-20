@@ -15,35 +15,13 @@
     <link href="./static/index.css" rel="stylesheet" type="text/css">
 
     <style>
-        /* ---------- M3 Design Tokens（暗色基线） ---------- */
         :root {
-            --md-primary: #D0BCFF;
-            --md-on-primary: #381E72;
-            --md-primary-container: #4F378B;
-            --md-on-primary-container: #EADDFF;
-            --md-secondary: #CCC2DC;
-            --md-on-secondary: #332D41;
-            --md-secondary-container: #4A4458;
-            --md-on-secondary-container: #E8DEF8;
-            --md-tertiary-container: #633B48;
-            --md-on-tertiary-container: #FFD8E4;
-            --md-error: #F2B8B5;
-            --md-on-error: #601410;
-            --md-surface: #141218;
-            --md-surface-container-low: #1D1B20;
-            --md-surface-container: #211F26;
-            --md-surface-container-high: #2B2930;
-            --md-surface-container-highest: #36343B;
-            --md-on-surface: #E6E0E9;
-            --md-on-surface-variant: #CAC4D0;
-            --md-outline: #938F99;
-            --md-outline-variant: #49454F;
-            --md-shape-xs: 4px;
-            --md-shape-sm: 8px;
-            --md-shape-md: 12px;
-            --md-shape-lg: 16px;
-            --md-shape-xl: 28px;
-            --md-shape-full: 999px;
+            --md-primary: #D0BCFF; --md-on-primary: #381E72; --md-primary-container: #4F378B; --md-on-primary-container: #EADDFF;
+            --md-secondary: #CCC2DC; --md-on-secondary: #332D41; --md-secondary-container: #4A4458; --md-on-secondary-container: #E8DEF8;
+            --md-tertiary-container: #633B48; --md-on-tertiary-container: #FFD8E4; --md-error: #F2B8B5; --md-on-error: #601410;
+            --md-surface: #141218; --md-surface-container-low: #1D1B20; --md-surface-container: #211F26; --md-surface-container-high: #2B2930;
+            --md-surface-container-highest: #36343B; --md-on-surface: #E6E0E9; --md-on-surface-variant: #CAC4D0; --md-outline: #938F99; --md-outline-variant: #49454F;
+            --md-shape-xs: 4px; --md-shape-sm: 8px; --md-shape-md: 12px; --md-shape-lg: 16px; --md-shape-xl: 28px; --md-shape-full: 999px;
             --md-elev-1: 0 1px 2px rgba(0, 0, 0, .30), 0 1px 3px 1px rgba(0, 0, 0, .15);
             --md-elev-2: 0 1px 2px rgba(0, 0, 0, .30), 0 2px 6px 2px rgba(0, 0, 0, .15);
             --md-elev-3: 0 1px 3px rgba(0, 0, 0, .30), 0 4px 8px 3px rgba(0, 0, 0, .15);
@@ -52,8 +30,7 @@
         *, *::before, *::after { box-sizing: border-box; }
         html { font-size: 16px; }
         body {
-            margin: 0; min-height: 100vh; background-color: var(--md-surface);
-            color: var(--md-on-surface);
+            margin: 0; min-height: 100vh; background-color: var(--md-surface); color: var(--md-on-surface);
             font-family: 'Roboto', 'Noto Sans SC', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, -apple-system, sans-serif;
             font-size: 1rem; line-height: 1.5; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
             transition: background-color 0.3s, color 0.3s;
@@ -166,7 +143,6 @@
             .m3-btn-group > .m3-btn { min-width: 0; }
         }
 
-        /* ================= 游戏内画面 ================= */
         #GameLayerBG { background: radial-gradient(circle at 50% 0%, #2B2930 0%, #141218 80%); }
         .block { background-color: rgba(255, 255, 255, 0.015) !important; box-shadow: inset 0 0 0 1px rgba(208, 188, 255, 0.08) !important; border-radius: 4px !important; }
         .block.bl { background-color: rgba(255, 255, 255, 0.04) !important; box-shadow: inset 0 0 0 1px rgba(208, 188, 255, 0.15) !important; }
@@ -186,7 +162,6 @@
         }
         #GameLayerBG.flash { animation: m3-flash 0.4s ease 3; }
 
-        /* ================= 强制修复样式 ================= */
         #welcome .btn, #welcome .m3-btn, #ready-btn {
             display: inline-flex !important; align-items: center !important; justify-content: center !important;
             min-height: 48px !important; padding: 0 24px !important; border-radius: 999px !important;
@@ -206,30 +181,13 @@
         #welcome .FILL { overflow-y: auto !important; overflow-x: hidden !important; -webkit-overflow-scrolling: touch; }
         #GameLayerBG { position: absolute !important; top: 0; left: 0; right: 0; bottom: 0; width: 100vw !important; height: 100vh !important; }
 
-        /* ================= 亮色模式 ================= */
         @media (prefers-color-scheme: light) {
             :root {
-                --md-primary: #6750A4;
-                --md-on-primary: #FFFFFF;
-                --md-primary-container: #EADDFF;
-                --md-on-primary-container: #21005D;
-                --md-secondary: #625B71;
-                --md-on-secondary: #FFFFFF;
-                --md-secondary-container: #E8DEF8;
-                --md-on-secondary-container: #1D192B;
-                --md-tertiary-container: #FFD8E4;
-                --md-on-tertiary-container: #31111D;
-                --md-error: #B3261E;
-                --md-on-error: #FFFFFF;
-                --md-surface: #F3EDF7;
-                --md-surface-container-low: #F7F2FA;
-                --md-surface-container: #F3EDF7;
-                --md-surface-container-high: #FFFFFF;
-                --md-surface-container-highest: #E6E0E9;
-                --md-on-surface: #1C1B1F;
-                --md-on-surface-variant: #49454F;
-                --md-outline: #79747E;
-                --md-outline-variant: #CAC4D0;
+                --md-primary: #6750A4; --md-on-primary: #FFFFFF; --md-primary-container: #EADDFF; --md-on-primary-container: #21005D;
+                --md-secondary: #625B71; --md-on-secondary: #FFFFFF; --md-secondary-container: #E8DEF8; --md-on-secondary-container: #1D192B;
+                --md-tertiary-container: #FFD8E4; --md-on-tertiary-container: #31111D; --md-error: #B3261E; --md-on-error: #FFFFFF;
+                --md-surface: #F3EDF7; --md-surface-container-low: #F7F2FA; --md-surface-container: #F3EDF7; --md-surface-container-high: #FFFFFF;
+                --md-surface-container-highest: #E6E0E9; --md-on-surface: #1C1B1F; --md-on-surface-variant: #49454F; --md-outline: #79747E; --md-outline-variant: #CAC4D0;
             }
             html, body { background-color: #F3EDF7 !important; }
             #welcome, .SHADE, .welcome-bg, .FILL { background-color: transparent !important; background-image: none !important; }
@@ -255,7 +213,6 @@
 </head>
 
 <body onLoad="init()" oncontextmenu=self.event.returnValue=false>
-    <!-- 结算层 -->
     <div id="GameScoreLayer" class="BBOX SHADE bgc1" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:100;">
         <div class="m3-dialog">
             <div id="GameScoreLayer-text"></div>
@@ -270,7 +227,6 @@
         </div>
     </div>
 
-    <!-- 欢迎/设置层 -->
     <div id="welcome" class="SHADE BOX-M">
         <div class="welcome-bg FILL"></div>
         <div class="FILL BOX-M" style="position:absolute;top:0;left:0;right:0;bottom:0;z-index:5;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;">
@@ -306,7 +262,6 @@
                         <button type="button" class="m3-chip" onclick="stair()">楼梯</button>
                         <button type="button" class="m3-chip" onclick="autoset('@##')">三纵</button>
                         
-                        <!-- 多压按钮 -->
                         <button type="button" class="m3-chip" onclick="autoset('D')">双押</button>
                         <button type="button" class="m3-chip" onclick="autoset('T')">三押</button>
                         <button type="button" class="m3-chip" onclick="autoset('A')">全压</button>
@@ -389,7 +344,6 @@
         </div>
     </div>
 
-    <!-- 终极翻译脚本 + PWA 注册 -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const settingsBtn = Array.from(document.querySelectorAll('button')).find(b => b.innerText.includes('游戏设置') || b.innerText.includes('Settings'));
@@ -426,10 +380,9 @@
                     '关闭音效': 'Mute Sound', '隐藏结算评语': 'Hide Result Comments', '开启垂直判定': 'Enable Vertical Judgement',
                     '自定义按键图片': 'Custom Note Image', '选择图片': 'Choose Image', '上一页': 'Prev', '下一页': 'Next',
                     '完成': 'Done', '得分': 'Score', '最佳': 'Best', '电脑端玩家按下R键可一键重开哦~': "PC players press 'R' to restart",
-                    '重来': 'Retry', '返回主页': 'Home' ,'双押': 'Double Chord','三押': 'Triple Chord','全压': 'Full Chord',
-                }; 
-    
-    
+                    '重来': 'Retry', '返回主页': 'Home'
+                };
+
                 const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
                 let node;
                 while(node = walk.nextNode()) {
