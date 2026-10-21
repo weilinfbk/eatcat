@@ -1,7 +1,7 @@
 {
-  "name": "Eat the Cat (吃掉小猫猫)",
+  "name": "吃掉小猫猫",
   "short_name": "Eat the Cat",
-  "description": "Material 3 Rhythm Game",
+  "description": "Material 3 Mini Game",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
