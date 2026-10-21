@@ -2,20 +2,6 @@
 <html lang="zh-CN">
 <head>
     <meta charset="utf-8" />
-    
-    <!-- 🌟 强制注销所有旧的 Service Worker，打破缓存死循环 🌟 -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(function(registrations) {
-                for(let registration of registrations) {
-                    registration.unregister();
-                } 
-            });
-        }
-    </script>
-
-    <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" content="#141218">
     <title>吃掉小猫猫</title>
     <meta itemprop="name" content="吃掉小猫猫！" />
     <meta itemprop="description" content="新概念音游" />
@@ -217,7 +203,7 @@
         }
     </style>
 
-    <!-- 🌟 引入 createjs 音乐库（使用国内极速 CDN，确保能加载） 🌟 -->
+    <!-- 引入 createjs 音乐库 -->
     <script src="https://cdn.bootcdn.net/ajax/libs/createjs/1.0.0/createjs.min.js"></script>
 </head>
 
@@ -333,6 +319,15 @@
                         </span>
                         <span class="m3-switch"><input type="checkbox" id="fsj" class="rradio"><span class="m3-switch-track"><span class="m3-switch-thumb"></span></span></span>
                     </label>
+                    <!-- 🌟 新增：练习模式开关 -->
+                    <label class="m3-row">
+                        <span class="m3-row-text">
+                            <span class="m3-row-title">练习模式</span>
+                            <span class="m3-row-sub">练习模式不会游戏结束</span>
+                        </span>
+                        <span class="m3-switch"><input type="checkbox" id="practice" class="rradio"><span class="m3-switch-track"><span class="m3-switch-thumb"></span></span></span>
+                    </label>
+                    
                     <h2 class="m3-section-title">自定义按键图片</h2>
                     <div class="m3-row" style="cursor:default;">
                         <span class="m3-row-text">
@@ -387,6 +382,7 @@
                     '基础设置': 'Basic Settings', '键数（建议 2~8）': 'Lane Count (2~8)', '绑定按键（如 dfjk）': 'Bind Keys (e.g., dfjk)',
                     '时间限制（秒）': 'Time Limit (sec)', '键型': 'Pattern', '游玩偏好': 'Preferences',
                     '关闭音效': 'Mute Sound', '隐藏结算评语': 'Hide Result Comments', '开启垂直判定': 'Enable Vertical Judgement',
+                    '练习模式': 'Practice Mode', '练习模式不会游戏结束': 'Practice mode will not end the game',
                     '自定义按键图片': 'Custom Note Image', '选择图片': 'Choose Image', '上一页': 'Prev', '下一页': 'Next',
                     '完成': 'Done', '得分': 'Score', '最佳': 'Best', '电脑端玩家按下R键可一键重开哦~': "PC players press 'R' to restart",
                     '重来': 'Retry', '返回主页': 'Home'
@@ -412,18 +408,8 @@
                 if(sub && sub.innerText.includes('支持')) sub.innerText = "Supports GIF / PNG / JPG / WebP";
             } catch (e) { console.error(e); }
         }
-
-        // 注册 Service Worker (PWA)
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('PWA 注册成功:', reg.scope))
-                    .catch(err => console.log('PWA 注册失败:', err));
-            });
-        }
     </script>
     
-    <!-- 注意：index.js 必须放在最底部！ -->
     <script src="./static/index.js"></script>
 </body>
 </html>
