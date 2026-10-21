@@ -408,7 +408,28 @@
             } catch (e) { console.error(e); }
         }
     </script>
-
-    <script src="./static/index.js?v=2"></script>
+<script>
+    // 注册 PWA Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => {
+                    console.log('PWA 注册成功:', reg.scope);
+                    // 检查更新
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                // 如果有新版本，自动刷新页面
+                                window.location.reload();
+                            }
+                        });
+                    });
+                })
+                .catch(err => console.log('PWA 注册失败:', err));
+        });
+    }
+</script>
+    <script src="./static/index.js?v=3"></script>
 </body>
 </html>
