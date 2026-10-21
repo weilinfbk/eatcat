@@ -151,7 +151,7 @@ function countBlockSize() {
     blockSize = body.offsetWidth / __k;
     body.style.height = window.innerHeight + 'px';
     GameLayerBG.style.height = window.innerHeight + 'px';
-    touchArea[0] = window.innerHeight - blockSize * 0; // 底边
+    touchArea[0] = window.innerHeight - blockSize * 0; // 最底边
     touchArea[1] = window.innerHeight - blockSize * 3; // 距离顶部 3 格的界限
 }
 
@@ -353,6 +353,7 @@ function refreshGameLayer(box, loop, offset) {
         box.y = 0;
         box.style[transform] = 'translate3D(0,' + box.y + 'px,0)';
     }
+    // 🌟 将动画时间缩短到 80ms，视觉跟手，按快了不至于漏
     box.style[transitionDuration] = '200ms';
 }
 
@@ -372,6 +373,7 @@ function gameLayerMoveNextRow() {
     }
 }
 
+// 🌟 核心修改：彻底采用旧版的“无脑列判定”，无视空地，X轴对了就吃！
 function gameTapEvent(e) {
     if (_gameOver) return false;
 
@@ -391,25 +393,10 @@ function gameTapEvent(e) {
 
     let hitIndex = -1;
     
-    // 🌟 核心修改：完全反转判定逻辑
+    // 完全还原旧版粗暴判定：只要按在正确的列，且在有效高度内，就直接算命中，不管点的是不是猫猫本体
     if (!_fsj) {
-        // 普通模式：必须点中猫猫本体
-        if (tar.notEmpty) {
-            if (p.chordGroup !== undefined) {
-                for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
-                    let cur = _gameBBList[i];
-                    if (cur.chordGroup !== p.chordGroup) break;
-                    if (cur.hit) continue;
-                    if (cur.id == tar.id) { hitIndex = i; break; }
-                }
-            } else {
-                if (p.id == tar.id) hitIndex = _gameBBListIndex;
-            }
-        }
-    } else {
-        // 垂直判定模式（按你的要求）：只放宽左右X轴，但如果点太高了不认
         if (x >= p.cell * blockSize && x < (p.cell + 1) * blockSize) {
-            if (y > touchArea[1]) { // 点在高度界限以下才认
+            if (y > touchArea[1]) {
                 hitIndex = _gameBBListIndex;
             }
         } else if (p.chordGroup !== undefined) {
@@ -420,6 +407,19 @@ function gameTapEvent(e) {
                 if (x >= cur.cell * blockSize && x < (cur.cell + 1) * blockSize && y > touchArea[1]) {
                     hitIndex = i; break;
                 }
+            }
+        }
+    } else {
+        if (tar.notEmpty) {
+            if (p.chordGroup !== undefined) {
+                for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
+                    let cur = _gameBBList[i];
+                    if (cur.chordGroup !== p.chordGroup) break;
+                    if (cur.hit) continue;
+                    if (cur.id == tar.id) { hitIndex = i; break; }
+                }
+            } else {
+                if (p.id == tar.id) hitIndex = _gameBBListIndex;
             }
         }
     }
@@ -457,7 +457,7 @@ function gameTapEvent(e) {
         }
         return false;
     } else {
-        // 🌟 宽容保护：只有在普通模式下，点到了上方空地才豁免死亡
+        // 宽容保护：普通模式下，点上方豁免
         if (!_fsj) {
             let currentCat = document.getElementById(p.id);
             if (currentCat) {
@@ -468,7 +468,6 @@ function gameTapEvent(e) {
             }
         }
 
-        // 垂直判定模式（或者普通模式下瞎点），直接判定 Miss
         if (!_gameStart) gameStart();
         playAudio("err");
         gameOver();
