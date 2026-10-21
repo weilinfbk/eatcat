@@ -151,18 +151,22 @@ function countBlockSize() {
     blockSize = body.offsetWidth / __k;
     body.style.height = window.innerHeight + 'px';
     GameLayerBG.style.height = window.innerHeight + 'px';
-    touchArea[0] = window.innerHeight - blockSize * 0;
-    touchArea[1] = window.innerHeight - blockSize * 3;
+    touchArea[0] = window.innerHeight - blockSize * 0; // 最底边
+    touchArea[1] = window.innerHeight - blockSize * 3; // 上方 3 格，视为点击太早的界限
 }
 
 let _gameBBList = [], _gameBBListIndex = 0, _gameOver = false, _gameStart = false, _gameTime, _gameTimeNum, _gameScore, _date1, deviation_time;
 
+function playAudio(id) {
+    if (_close) return;
+    try {
+        var audio = new Audio('./static/music/' + id + '.mp3');
+        audio.volume = 0.8;
+        audio.play().catch(function(e) {});
+    } catch(e) {}
+}
+
 function gameInit() {
-    if (typeof createjs !== 'undefined') {
-        createjs.Sound.registerSound({ src: "./static/music/err.mp3", id: "err" });
-        createjs.Sound.registerSound({ src: "./static/music/end.mp3", id: "end" });
-        createjs.Sound.registerSound({ src: "./static/music/tap.mp3", id: "tap" });
-    }
     gameRestart();
 }
 
@@ -214,7 +218,7 @@ function gameTime() {
         GameTimeLayer.innerHTML = isEnSystem ? '&nbsp;&nbsp;&nbsp;&nbsp;Time\'s Up!' : '&nbsp;&nbsp;&nbsp;&nbsp;时间到！';
         gameOver();
         GameLayerBG.className += ' flash';
-        if (typeof createjs !== 'undefined') createjs.Sound.play("end");
+        playAudio("end");
     } else {
         GameTimeLayer.innerHTML = creatTimeText(_gameTimeNum);
     }
@@ -387,19 +391,23 @@ function gameTapEvent(e) {
 
     let hitIndex = -1;
     if (!_fsj) {
+        // 🌟 普通模式（横向判定）：只放宽X轴，如果点得太高（上方空地）直接算Miss
         if (x >= p.cell * blockSize && x < (p.cell + 1) * blockSize) {
-            hitIndex = _gameBBListIndex;
+            if (y > touchArea[1]) {
+                hitIndex = _gameBBListIndex;
+            }
         } else if (p.chordGroup !== undefined) {
             for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
                 let cur = _gameBBList[i];
                 if (cur.chordGroup !== p.chordGroup) break;
                 if (cur.hit) continue;
-                if (x >= cur.cell * blockSize && x < (cur.cell + 1) * blockSize) {
+                if (x >= cur.cell * blockSize && x < (cur.cell + 1) * blockSize && y > touchArea[1]) {
                     hitIndex = i; break;
                 }
             }
         }
     } else {
+        // 🌟 垂直判定模式：必须点中猫猫本体
         if (tar.notEmpty) {
             if (p.chordGroup !== undefined) {
                 for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
@@ -416,7 +424,7 @@ function gameTapEvent(e) {
 
     if (hitIndex !== -1) {
         if (!_gameStart) gameStart();
-        if (typeof createjs !== 'undefined') createjs.Sound.play("tap");
+        playAudio("tap");
 
         let curP = _gameBBList[hitIndex];
         if (curP.hit) return false;
@@ -447,20 +455,20 @@ function gameTapEvent(e) {
         }
         return false;
     } else {
-        // 🌟 核心修改：如果开启了垂直判定，才执行防误触（点在上方不惩罚）
+        // 🌟 防误触：只有开启了垂直判定，且点在了目标方块上方，才豁免死亡
         if (_fsj) {
             let currentCat = document.getElementById(p.id);
             if (currentCat) {
                 let rect = currentCat.getBoundingClientRect();
                 if (y < rect.top) {
-                    return false; // 点在目标方块上方，忽略
+                    return false;
                 }
             }
         }
 
-        // 如果没开垂直判定，或者没在防误触范围内，直接 Miss
+        // 如果没开启垂直判定，或者点得不对，直接 Miss 死亡
         if (!_gameStart) gameStart();
-        if (typeof createjs !== 'undefined') createjs.Sound.play("err");
+        playAudio("err");
         gameOver();
         
         if (tar.classList && tar.classList.contains('block')) {
