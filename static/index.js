@@ -7,7 +7,7 @@ dynamicStyle.type = 'text/css';
 dynamicStyle.textContent = 'html,body {font-size:' + (fontunit < 30 ? fontunit : '30') + 'px;}' +
     (isDesktop ? '#welcome,#GameTimeLayer,#GameLayerBG,#GameScoreLayer.SHADE{position: absolute;}' :
         '#welcome,#GameTimeLayer,#GameLayerBG,#GameScoreLayer.SHADE{position:fixed;}@media screen and (orientation:landscape) {#landscape {display: box; display: -webkit-box; display: -moz-box; display: -ms-flexbox;}}') +
-    '#GameLayerBG { touch-action: none !important; -webkit-user-select: none !important; }' +
+    '#GameLayerBG { touch-action: none !important; -webkit-user-select: none !important; user-select: none !important; -webkit-touch-callout: none; }' +
     '.block.hit { opacity: 0.35; }' +
     '.block.bad { background-color: #d33 !important; }';
 document.head.appendChild(dynamicStyle);
@@ -21,8 +21,38 @@ let __Time = 20;
 let __k = 4;
 let _close = false;
 let _fsj = false;
-let _practice = false; // 🌟 新增：练习模式状态
+let _practice = false;
 var url = './static/image/ClickBefore.png';
+
+// 🌟 iOS 音频池优化：预加载，不重复创建，解决卡顿
+const audioPool = {
+    tap: [],
+    err: [],
+    end: []
+};
+let audioIndex = { tap: 0, err: 0, end: 0 };
+
+function initAudioPool() {
+    for (let i = 0; i < 5; i++) {
+        audioPool.tap.push(new Audio('./static/music/tap.mp3'));
+        audioPool.err.push(new Audio('./static/music/err.mp3'));
+    }
+    audioPool.end.push(new Audio('./static/music/end.mp3'));
+}
+
+function playAudio(id) {
+    if (_close) return;
+    try {
+        let pool = audioPool[id];
+        if (!pool || pool.length === 0) return;
+        
+        let audio = pool[audioIndex[id]];
+        audioIndex[id] = (audioIndex[id] + 1) % pool.length;
+        
+        audio.currentTime = 0;
+        audio.play().catch(function() {});
+    } catch(e) {}
+}
 
 function isplaying() {
     return document.getElementById('welcome').style.display == 'none' &&
@@ -75,6 +105,7 @@ function bindEvents() {
     GameLayerBG.removeEventListener('touchstart', handleTouchStart);
     GameLayerBG.removeEventListener('pointerdown', handlePointerDown);
 
+    // iOS 上 pointerdown 表现更好，但为了兼容保留 touchstart
     if (window.PointerEvent) {
         GameLayerBG.addEventListener('pointerdown', handlePointerDown, { passive: false });
     } else if ('ontouchstart' in window) {
@@ -105,6 +136,8 @@ function handleTouchStart(e) {
 }
 
 function init() {
+    initAudioPool(); // 初始化音频池
+    
     showWelcomeLayer();
     body = document.getElementById('gameBody') || document.body;
     body.style.height = window.innerHeight + 'px';
@@ -144,20 +177,11 @@ function countBlockSize() {
     blockSize = body.offsetWidth / __k;
     body.style.height = window.innerHeight + 'px';
     GameLayerBG.style.height = window.innerHeight + 'px';
-    touchArea[0] = window.innerHeight - blockSize * 0; // 最底边
-    touchArea[1] = window.innerHeight - blockSize * 3; // 距离顶部 3 格的界限
+    touchArea[0] = window.innerHeight - blockSize * 0;
+    touchArea[1] = window.innerHeight - blockSize * 3;
 }
 
 let _gameBBList = [], _gameBBListIndex = 0, _gameOver = false, _gameStart = false, _gameTime, _gameTimeNum, _gameScore, _date1, deviation_time;
-
-function playAudio(id) {
-    if (_close) return;
-    try {
-        var audio = new Audio('./static/music/' + id + '.mp3');
-        audio.volume = 0.8;
-        audio.play().catch(function(e) {});
-    } catch(e) {}
-}
 
 function gameInit() {
     gameRestart();
@@ -346,8 +370,7 @@ function refreshGameLayer(box, loop, offset) {
         box.y = 0;
         box.style[transform] = 'translate3D(0,' + box.y + 'px,0)';
     }
-    // 动画时间 80ms 更跟手
-    box.style[transitionDuration] = '80ms';
+    box.style[transitionDuration] = '80ms'; // iOS 上 80ms 比较跟手
 }
 
 function gameLayerMoveNextRow() {
@@ -385,7 +408,6 @@ function gameTapEvent(e) {
 
     let hitIndex = -1;
     
-    // 无脑列判定
     if (!_fsj) {
         if (x >= p.cell * blockSize && x < (p.cell + 1) * blockSize) {
             if (y > touchArea[1]) {
@@ -449,7 +471,6 @@ function gameTapEvent(e) {
         }
         return false;
     } else {
-        // 宽容保护
         if (!_fsj) {
             let currentCat = document.getElementById(p.id);
             if (currentCat) {
@@ -463,14 +484,12 @@ function gameTapEvent(e) {
         if (!_gameStart) gameStart();
         playAudio("err");
         
-        // 🌟 核心逻辑：练习模式下不结束游戏
         if (!_practice) {
             gameOver();
         }
         
         if (tar.classList && tar.classList.contains('block')) {
             tar.classList.add('bad');
-            // 练习模式下，让红框闪一下消失，方便继续玩
             if (_practice) {
                 setTimeout(function() {
                     if (tar.classList) tar.classList.remove('bad');
@@ -540,7 +559,6 @@ function showGameScoreLayer() {
     document.getElementById('GameScoreLayer-score').innerHTML = score_text;
 
     let bast = cookie('bast-score');
-    // 🌟 核心逻辑：练习模式不记录最高分
     if (!_practice) {
         if (!bast || _gameScore > bast) {
             bast = _gameScore;
@@ -658,7 +676,7 @@ function initSetting() {
     if (cookie("hide") && cookie("hide").toString() == '1') hide = true;
     if (cookie("fsj") && cookie("fsj").toString() == '1') _fsj = true;
     if (cookie("close") && cookie("close").toString() == '1') _close = true;
-    if (cookie("practice") && cookie("practice").toString() == '1') _practice = true; // 🌟 读取练习模式
+    if (cookie("practice") && cookie("practice").toString() == '1') _practice = true;
     gameRestart();
 }
 
@@ -692,7 +710,7 @@ function show_setting() {
     document.getElementById("hide").checked = hide;
     document.getElementById("close").checked = _close;
     document.getElementById("fsj").checked = _fsj;
-    document.getElementById("practice").checked = _practice; // 🌟 UI 同步
+    document.getElementById("practice").checked = _practice;
     document.getElementById("btn_group").style.display = "none";
     document.getElementById("btn_group2").style.display = "none";
     document.getElementById("tt").style.display = "none";
@@ -711,7 +729,7 @@ function save_cookie() {
     hide = document.getElementById("hide").checked;
     _close = document.getElementById("close").checked;
     _fsj = document.getElementById("fsj").checked;
-    _practice = document.getElementById("practice").checked; // 🌟 保存练习模式
+    _practice = document.getElementById("practice").checked;
 
     let tsmp = parseInt(document.getElementById("k").value);
     if (tsmp != __k) {
@@ -733,7 +751,7 @@ function save_cookie() {
     cookie('close', _close ? "1" : "0", 100);
     cookie('hide', hide ? "1" : "0", 100);
     cookie('fsj', _fsj ? "1" : "0", 100);
-    cookie('practice', _practice ? "1" : "0", 100); // 🌟 写入Cookie
+    cookie('practice', _practice ? "1" : "0", 100);
     gameRestart();
 }
 
@@ -815,4 +833,4 @@ function stair() {
     for (var i = __k; i > 1; --i) key.push(i.toString());
     gl();
     gameRestart();
-}
+             }
