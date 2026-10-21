@@ -447,14 +447,18 @@ function gameTapEvent(e) {
         }
         return false;
     } else {
-        let currentCat = document.getElementById(p.id);
-        if (currentCat) {
-            let rect = currentCat.getBoundingClientRect();
-            if (y < rect.top) {
-                return false;
+        // 🌟 核心修改：如果开启了垂直判定，才执行防误触（点在上方不惩罚）
+        if (_fsj) {
+            let currentCat = document.getElementById(p.id);
+            if (currentCat) {
+                let rect = currentCat.getBoundingClientRect();
+                if (y < rect.top) {
+                    return false; // 点在目标方块上方，忽略
+                }
             }
         }
 
+        // 如果没开垂直判定，或者没在防误触范围内，直接 Miss
         if (!_gameStart) gameStart();
         if (typeof createjs !== 'undefined') createjs.Sound.play("err");
         gameOver();
@@ -473,7 +477,6 @@ function createGameLayer() {
         html += '<div id="' + id + '" class="GameLayer">';
         for (let j = 0; j < (__k * 2 >= 10 ? __k * 2 : __k * 3); j++) {
             for (let k = 0; k < __k; k++) {
-                // 🌟 这里全部使用 block，去掉了 bl
                 html += '<div id="' + id + '-' + (k + j * __k) + '" num="' + (k + j * __k) + '" class="block"></div>';
             }
         }
