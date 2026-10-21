@@ -178,7 +178,7 @@ function gameRestart() {
         let box = GameLayer[i];
         for (let j = 0; j < box.children.length; j++) {
             let r = box.children[j];
-            r.className = 'block' + (j % __k ? ' bl' : '');
+            r.className = 'block';
             r.style.backgroundImage = "none";
             r.notEmpty = false;
         }
@@ -288,7 +288,7 @@ function refreshGameLayer(box, loop, offset) {
         rstyle.width = blockSize + 'px';
         rstyle.height = blockSize + 'px';
         rstyle.backgroundImage = "none";
-        r.className = r.className.replace(_clearttClsReg, '');
+        r.className = 'block';
         r.notEmpty = false;
     }
 
@@ -447,7 +447,6 @@ function gameTapEvent(e) {
         }
         return false;
     } else {
-        // 🌟 加回防误触：如果你点在了目标方块上方（还没掉下来），当作没点，直接忽略
         let currentCat = document.getElementById(p.id);
         if (currentCat) {
             let rect = currentCat.getBoundingClientRect();
@@ -456,7 +455,6 @@ function gameTapEvent(e) {
             }
         }
 
-        // 没有防误触保护，直接 Miss
         if (!_gameStart) gameStart();
         if (typeof createjs !== 'undefined') createjs.Sound.play("err");
         gameOver();
@@ -475,7 +473,8 @@ function createGameLayer() {
         html += '<div id="' + id + '" class="GameLayer">';
         for (let j = 0; j < (__k * 2 >= 10 ? __k * 2 : __k * 3); j++) {
             for (let k = 0; k < __k; k++) {
-                html += '<div id="' + id + '-' + (k + j * __k) + '" num="' + (k + j * __k) + '" class="block' + (k ? ' bl' : '') + '"></div>';
+                // 🌟 这里全部使用 block，去掉了 bl
+                html += '<div id="' + id + '-' + (k + j * __k) + '" num="' + (k + j * __k) + '" class="block"></div>';
             }
         }
         html += '</div>';
@@ -584,7 +583,7 @@ function cookie(name, value, time) {
             return document.cookie = name + "=" + escape(toStr(value)) + (time ? "; expires=" + time + (arguments[3] ? "; domain=" + arguments[3] + (arguments[4] ? "; path=" + arguments[4] + (arguments[5] ? "; secure" : "") : "") : "") : ""), !0;
         }
         return value = document.cookie.match("(?:^|;)\\s*" + name.replace(/([-.*+?^${}()|[\]\/\\])/g, "\\$1") + "=([^;]*)"),
-            value = value && "string" == typeof value[1] ? unescape(value[1]) : !1, (/^(\{|\[).+\}|\]$/.test(value) || /^[0-9]+$/g.test(value)) && eval("value=" + value), value;
+            value = value && "string" == typeof value[1] ? unescape(value[1]) : !1, (/^(\{|\[).+\}|\]$/.test(value) || /^[0-9]+$/.test(value)) && eval("value=" + value), value;
     }
     let data = {};
     value = document.cookie.replace(/\s/g, "").split(";");
