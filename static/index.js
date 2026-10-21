@@ -157,7 +157,6 @@ function countBlockSize() {
 
 let _gameBBList = [], _gameBBListIndex = 0, _gameOver = false, _gameStart = false, _gameTime, _gameTimeNum, _gameScore, _date1, deviation_time;
 
-// ===== 改回旧版：使用 createjs 音频引擎 =====
 function gameInit() {
     if (typeof createjs !== 'undefined') {
         createjs.Sound.registerSound({ src: "./static/music/err.mp3", id: "err" });
@@ -277,7 +276,6 @@ function randomPos() {
     return x;
 }
 
-// ===== 改回旧版：left/bottom 定位，150ms 动画 =====
 function refreshGameLayer(box, loop, offset) {
     let totalRows = Math.floor(box.children.length / __k);
     let startRow = loop ? 0 : 1;
@@ -285,7 +283,6 @@ function refreshGameLayer(box, loop, offset) {
 
     for (let j = 0; j < box.children.length; j++) {
         let r = box.children[j], rstyle = r.style;
-        // 旧版动画性能（会触发重排）
         rstyle.left = (j % __k) * blockSize + 'px';
         rstyle.bottom = Math.floor(j / __k) * blockSize + 'px';
         rstyle.width = blockSize + 'px';
@@ -352,7 +349,6 @@ function refreshGameLayer(box, loop, offset) {
         box.y = 0;
         box.style[transform] = 'translate3D(0,' + box.y + 'px,0)';
     }
-    // 旧版 150ms 拖沓手感
     box.style[transitionDuration] = '150ms';
 }
 
@@ -372,7 +368,6 @@ function gameLayerMoveNextRow() {
     }
 }
 
-// ===== 改回旧版：横向严格判定，无防误触，tt/bad 类名反馈 =====
 function gameTapEvent(e) {
     if (_gameOver) return false;
 
@@ -391,7 +386,6 @@ function gameTapEvent(e) {
     }
 
     let hitIndex = -1;
-    // 旧版严格横向判定，没有 30% 宽容
     if (!_fsj) {
         if (x >= p.cell * blockSize && x < (p.cell + 1) * blockSize) {
             hitIndex = _gameBBListIndex;
@@ -429,7 +423,6 @@ function gameTapEvent(e) {
         curP.hit = true;
 
         let curTar = document.getElementById(curP.id);
-        // 旧版视觉反馈：替换成 tt 类（高亮）
         if (curTar) {
             curTar.className = curTar.className.replace(_ttreg, ' tt$1');
             curTar.style.backgroundImage = "none";
@@ -454,12 +447,20 @@ function gameTapEvent(e) {
         }
         return false;
     } else {
-        // 旧版防误触逻辑：没有上方的宽容保护，只要没点对，立即死
+        // 🌟 加回防误触：如果你点在了目标方块上方（还没掉下来），当作没点，直接忽略
+        let currentCat = document.getElementById(p.id);
+        if (currentCat) {
+            let rect = currentCat.getBoundingClientRect();
+            if (y < rect.top) {
+                return false;
+            }
+        }
+
+        // 没有防误触保护，直接 Miss
         if (!_gameStart) gameStart();
         if (typeof createjs !== 'undefined') createjs.Sound.play("err");
         gameOver();
         
-        // 旧版视觉反馈：点错的格子加 bad 类（变红）
         if (tar.classList && tar.classList.contains('block')) {
             tar.classList.add('bad');
         }
