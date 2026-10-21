@@ -16,7 +16,7 @@ dynamicStyle.textContent = 'html,body {font-size:' + (fontunit < 30 ? fontunit :
     (isDesktop ? '#welcome,#GameTimeLayer,#GameLayerBG,#GameScoreLayer.SHADE{position: absolute;}' :
         '#welcome,#GameTimeLayer,#GameLayerBG,#GameScoreLayer.SHADE{position:fixed;}@media screen and (orientation:landscape) {#landscape {display: box; display: -webkit-box; display: -moz-box; display: -ms-flexbox;}}') +
     '#GameLayerBG { touch-action: none !important; -webkit-user-select: none !important; }' +
-    '.block, .block.bl { background-color: transparent !important; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05) !important; }' +
+    '.block.hit { opacity: 0.35; }' +
     '.block.bad { background-color: #d33 !important; }';
 document.head.appendChild(dynamicStyle);
 
@@ -157,51 +157,13 @@ function countBlockSize() {
 
 let _gameBBList = [], _gameBBListIndex = 0, _gameOver = false, _gameStart = false, _gameTime, _gameTimeNum, _gameScore, _date1, deviation_time;
 
-function playAudio(id) {
-    if (_close) return;
-    try {
-        var audio = new Audio('./static/music/' + id + '.mp3');
-        audio.volume = 0.8;
-        audio.play().catch(function(e) {});
-    } catch(e) {}
-}
-
-function playErrorSound() {
-    if (_close) return;
-    playAudio("miss");
-    try {
-        var ctx = new (window.AudioContext || window.webkitAudioContext)();
-        var osc = ctx.createOscillator();
-        var gain = ctx.createGain();
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(200, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.2);
-        gain.gain.setValueAtTime(0.3, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.2);
-    } catch (e) {}
-}
-
-// 🌟 核心：强制让格子变紫
-function makePurple(el) {
-    if (el && el.classList && el.classList.contains('block')) {
-        el.style.setProperty('background-color', '#D0BCFF', 'important');
-        el.style.setProperty('box-shadow', 'inset 0 0 0 3px #6750A4', 'important');
-    }
-}
-
-// 🌟 核心：强制让格子变红（用于点错）
-function makeRed(el) {
-    if (el && el.classList && el.classList.contains('block')) {
-        el.style.setProperty('background-color', '#d33', 'important');
-        el.style.setProperty('box-shadow', 'inset 0 0 0 3px #ff0000', 'important');
-    }
-}
-
+// ===== 改回旧版：使用 createjs 音频引擎 =====
 function gameInit() {
+    if (typeof createjs !== 'undefined') {
+        createjs.Sound.registerSound({ src: "./static/music/err.mp3", id: "err" });
+        createjs.Sound.registerSound({ src: "./static/music/end.mp3", id: "end" });
+        createjs.Sound.registerSound({ src: "./static/music/tap.mp3", id: "tap" });
+    }
     gameRestart();
 }
 
@@ -219,9 +181,6 @@ function gameRestart() {
             let r = box.children[j];
             r.className = 'block' + (j % __k ? ' bl' : '');
             r.style.backgroundImage = "none";
-            r.style.removeProperty('background-color');
-            r.style.removeProperty('box-shadow');
-            r.removeAttribute('data-hit');
             r.notEmpty = false;
         }
     }
@@ -256,7 +215,7 @@ function gameTime() {
         GameTimeLayer.innerHTML = isEnSystem ? '&nbsp;&nbsp;&nbsp;&nbsp;Time\'s Up!' : '&nbsp;&nbsp;&nbsp;&nbsp;时间到！';
         gameOver();
         GameLayerBG.className += ' flash';
-        playAudio("end");
+        if (typeof createjs !== 'undefined') createjs.Sound.play("end");
     } else {
         GameTimeLayer.innerHTML = creatTimeText(_gameTimeNum);
     }
@@ -318,6 +277,7 @@ function randomPos() {
     return x;
 }
 
+// ===== 改回旧版：left/bottom 定位，150ms 动画 =====
 function refreshGameLayer(box, loop, offset) {
     let totalRows = Math.floor(box.children.length / __k);
     let startRow = loop ? 0 : 1;
@@ -325,6 +285,7 @@ function refreshGameLayer(box, loop, offset) {
 
     for (let j = 0; j < box.children.length; j++) {
         let r = box.children[j], rstyle = r.style;
+        // 旧版动画性能（会触发重排）
         rstyle.left = (j % __k) * blockSize + 'px';
         rstyle.bottom = Math.floor(j / __k) * blockSize + 'px';
         rstyle.width = blockSize + 'px';
@@ -332,9 +293,6 @@ function refreshGameLayer(box, loop, offset) {
         rstyle.backgroundImage = "none";
         r.className = r.className.replace(_clearttClsReg, '');
         r.notEmpty = false;
-        r.style.removeProperty('background-color');
-        r.style.removeProperty('box-shadow');
-        r.removeAttribute('data-hit');
     }
 
     for (let row = startRow; row < totalRows; row++) {
@@ -394,7 +352,8 @@ function refreshGameLayer(box, loop, offset) {
         box.y = 0;
         box.style[transform] = 'translate3D(0,' + box.y + 'px,0)';
     }
-    box.style[transitionDuration] = '80ms';
+    // 旧版 150ms 拖沓手感
+    box.style[transitionDuration] = '150ms';
 }
 
 function gameLayerMoveNextRow() {
@@ -413,6 +372,7 @@ function gameLayerMoveNextRow() {
     }
 }
 
+// ===== 改回旧版：横向严格判定，无防误触，tt/bad 类名反馈 =====
 function gameTapEvent(e) {
     if (_gameOver) return false;
 
@@ -431,17 +391,16 @@ function gameTapEvent(e) {
     }
 
     let hitIndex = -1;
-    let pad = blockSize * 0.30;
-
+    // 旧版严格横向判定，没有 30% 宽容
     if (!_fsj) {
-        if (x >= p.cell * blockSize - pad && x <= (p.cell + 1) * blockSize + pad) {
+        if (x >= p.cell * blockSize && x < (p.cell + 1) * blockSize) {
             hitIndex = _gameBBListIndex;
         } else if (p.chordGroup !== undefined) {
             for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
                 let cur = _gameBBList[i];
                 if (cur.chordGroup !== p.chordGroup) break;
                 if (cur.hit) continue;
-                if (x >= cur.cell * blockSize - pad && x <= (cur.cell + 1) * blockSize + pad) {
+                if (x >= cur.cell * blockSize && x < (cur.cell + 1) * blockSize) {
                     hitIndex = i; break;
                 }
             }
@@ -463,23 +422,19 @@ function gameTapEvent(e) {
 
     if (hitIndex !== -1) {
         if (!_gameStart) gameStart();
-        playAudio("tap");
+        if (typeof createjs !== 'undefined') createjs.Sound.play("tap");
 
         let curP = _gameBBList[hitIndex];
         if (curP.hit) return false;
         curP.hit = true;
 
         let curTar = document.getElementById(curP.id);
+        // 旧版视觉反馈：替换成 tt 类（高亮）
         if (curTar) {
-            curTar.setAttribute('data-hit', 'true');
-            makePurple(curTar); 
+            curTar.className = curTar.className.replace(_ttreg, ' tt$1');
             curTar.style.backgroundImage = "none";
             curTar.notEmpty = false;
         }
-        if (tar && tar !== curTar && tar.classList && tar.classList.contains('block')) {
-            makePurple(tar); // 如果因为宽容点空了，空地也直接变紫
-        }
-
         _gameScore++;
 
         let allHit = true;
@@ -499,26 +454,15 @@ function gameTapEvent(e) {
         }
         return false;
     } else {
-        // 🌟 只要没点中，直接判定 Miss，不去管是不是按早了
+        // 旧版防误触逻辑：没有上方的宽容保护，只要没点对，立即死
         if (!_gameStart) gameStart();
-        playErrorSound();
+        if (typeof createjs !== 'undefined') createjs.Sound.play("err");
         gameOver();
-
-        // 1. 让真正该点的猫猫变红
-        let currentCat = document.getElementById(p.id);
-        if (currentCat) {
-            makeRed(currentCat);
+        
+        // 旧版视觉反馈：点错的格子加 bad 类（变红）
+        if (tar.classList && tar.classList.contains('block')) {
+            tar.classList.add('bad');
         }
-
-        // 2. 让你手指按到的那个空白格子也变红
-        // 因为有时候点在两个格子中间的缝里，target 可能是背景，所以通过坐标重新找一次
-        let clickedEl = document.elementFromPoint(x, y);
-        if (clickedEl && clickedEl.classList && clickedEl.classList.contains('block')) {
-            makeRed(clickedEl);
-        } else if (tar && tar.classList && tar.classList.contains('block')) {
-            makeRed(tar);
-        }
-
         return false;
     }
 }
