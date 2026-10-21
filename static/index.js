@@ -1,11 +1,3 @@
-// 强制清理旧缓存
-if (!localStorage.getItem('eatcat_v15')) {
-    document.cookie.split(";").forEach(function(c) { 
-        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
-    });
-    localStorage.setItem('eatcat_v15', 'ok');
-}
-
 const isEnSystem = navigator.language.toLowerCase().includes('en');
 let isDesktop = navigator['userAgent'].match(/(ipad|iphone|ipod|android|windows phone)/i) ? false : true;
 let fontunit = isDesktop ? 20 : ((window.innerWidth > window.innerHeight ? window.innerHeight : window.innerWidth) / 320) * 10;
@@ -29,6 +21,7 @@ let __Time = 20;
 let __k = 4;
 let _close = false;
 let _fsj = false;
+let _practice = false; // 🌟 新增：练习模式状态
 var url = './static/image/ClickBefore.png';
 
 function isplaying() {
@@ -353,8 +346,8 @@ function refreshGameLayer(box, loop, offset) {
         box.y = 0;
         box.style[transform] = 'translate3D(0,' + box.y + 'px,0)';
     }
-    // 🌟 将动画时间缩短到 80ms，视觉跟手，按快了不至于漏
-    box.style[transitionDuration] = '200ms';
+    // 动画时间 80ms 更跟手
+    box.style[transitionDuration] = '80ms';
 }
 
 function gameLayerMoveNextRow() {
@@ -373,7 +366,6 @@ function gameLayerMoveNextRow() {
     }
 }
 
-// 🌟 核心修改：彻底采用旧版的“无脑列判定”，无视空地，X轴对了就吃！
 function gameTapEvent(e) {
     if (_gameOver) return false;
 
@@ -393,7 +385,7 @@ function gameTapEvent(e) {
 
     let hitIndex = -1;
     
-    // 完全还原旧版粗暴判定：只要按在正确的列，且在有效高度内，就直接算命中，不管点的是不是猫猫本体
+    // 无脑列判定
     if (!_fsj) {
         if (x >= p.cell * blockSize && x < (p.cell + 1) * blockSize) {
             if (y > touchArea[1]) {
@@ -457,7 +449,7 @@ function gameTapEvent(e) {
         }
         return false;
     } else {
-        // 宽容保护：普通模式下，点上方豁免
+        // 宽容保护
         if (!_fsj) {
             let currentCat = document.getElementById(p.id);
             if (currentCat) {
@@ -470,10 +462,20 @@ function gameTapEvent(e) {
 
         if (!_gameStart) gameStart();
         playAudio("err");
-        gameOver();
+        
+        // 🌟 核心逻辑：练习模式下不结束游戏
+        if (!_practice) {
+            gameOver();
+        }
         
         if (tar.classList && tar.classList.contains('block')) {
             tar.classList.add('bad');
+            // 练习模式下，让红框闪一下消失，方便继续玩
+            if (_practice) {
+                setTimeout(function() {
+                    if (tar.classList) tar.classList.remove('bad');
+                }, 300);
+            }
         }
         return false;
     }
@@ -538,10 +540,16 @@ function showGameScoreLayer() {
     document.getElementById('GameScoreLayer-score').innerHTML = score_text;
 
     let bast = cookie('bast-score');
-    if (!bast || _gameScore > bast) {
-        bast = _gameScore;
-        cookie('bast-score', bast, 100);
+    // 🌟 核心逻辑：练习模式不记录最高分
+    if (!_practice) {
+        if (!bast || _gameScore > bast) {
+            bast = _gameScore;
+            cookie('bast-score', bast, 100);
+        }
+    } else {
+        if (!bast) bast = 0;
     }
+    
     document.getElementById('GameScoreLayer-bast').innerHTML = (isEnSystem ? 'Best Score: ' : '历史最佳得分 ') + "<span style='color:red;'>" + bast + "</span>";
     let now = (isEnSystem ? 'Your custom pattern: ' : '您的自定义键型为：') + "<span style='color:red;'>" + key.join('') + "</span>";
     document.getElementById('now').innerHTML = now;
@@ -650,6 +658,7 @@ function initSetting() {
     if (cookie("hide") && cookie("hide").toString() == '1') hide = true;
     if (cookie("fsj") && cookie("fsj").toString() == '1') _fsj = true;
     if (cookie("close") && cookie("close").toString() == '1') _close = true;
+    if (cookie("practice") && cookie("practice").toString() == '1') _practice = true; // 🌟 读取练习模式
     gameRestart();
 }
 
@@ -683,6 +692,7 @@ function show_setting() {
     document.getElementById("hide").checked = hide;
     document.getElementById("close").checked = _close;
     document.getElementById("fsj").checked = _fsj;
+    document.getElementById("practice").checked = _practice; // 🌟 UI 同步
     document.getElementById("btn_group").style.display = "none";
     document.getElementById("btn_group2").style.display = "none";
     document.getElementById("tt").style.display = "none";
@@ -701,6 +711,7 @@ function save_cookie() {
     hide = document.getElementById("hide").checked;
     _close = document.getElementById("close").checked;
     _fsj = document.getElementById("fsj").checked;
+    _practice = document.getElementById("practice").checked; // 🌟 保存练习模式
 
     let tsmp = parseInt(document.getElementById("k").value);
     if (tsmp != __k) {
@@ -722,6 +733,7 @@ function save_cookie() {
     cookie('close', _close ? "1" : "0", 100);
     cookie('hide', hide ? "1" : "0", 100);
     cookie('fsj', _fsj ? "1" : "0", 100);
+    cookie('practice', _practice ? "1" : "0", 100); // 🌟 写入Cookie
     gameRestart();
 }
 
