@@ -151,8 +151,8 @@ function countBlockSize() {
     blockSize = body.offsetWidth / __k;
     body.style.height = window.innerHeight + 'px';
     GameLayerBG.style.height = window.innerHeight + 'px';
-    touchArea[0] = window.innerHeight - blockSize * 0; // 最底边
-    touchArea[1] = window.innerHeight - blockSize * 3; // 上方 3 格，视为点击太早的界限
+    touchArea[0] = window.innerHeight - blockSize * 0; // 底边
+    touchArea[1] = window.innerHeight - blockSize * 3; // 距离顶部 3 格的界限
 }
 
 let _gameBBList = [], _gameBBListIndex = 0, _gameOver = false, _gameStart = false, _gameTime, _gameTimeNum, _gameScore, _date1, deviation_time;
@@ -390,24 +390,10 @@ function gameTapEvent(e) {
     }
 
     let hitIndex = -1;
+    
+    // 🌟 核心修改：完全反转判定逻辑
     if (!_fsj) {
-        // 🌟 普通模式（横向判定）：只放宽X轴，如果点得太高（上方空地）直接算Miss
-        if (x >= p.cell * blockSize && x < (p.cell + 1) * blockSize) {
-            if (y > touchArea[1]) {
-                hitIndex = _gameBBListIndex;
-            }
-        } else if (p.chordGroup !== undefined) {
-            for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
-                let cur = _gameBBList[i];
-                if (cur.chordGroup !== p.chordGroup) break;
-                if (cur.hit) continue;
-                if (x >= cur.cell * blockSize && x < (cur.cell + 1) * blockSize && y > touchArea[1]) {
-                    hitIndex = i; break;
-                }
-            }
-        }
-    } else {
-        // 🌟 垂直判定模式：必须点中猫猫本体
+        // 普通模式：必须点中猫猫本体
         if (tar.notEmpty) {
             if (p.chordGroup !== undefined) {
                 for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
@@ -418,6 +404,22 @@ function gameTapEvent(e) {
                 }
             } else {
                 if (p.id == tar.id) hitIndex = _gameBBListIndex;
+            }
+        }
+    } else {
+        // 垂直判定模式（按你的要求）：只放宽左右X轴，但如果点太高了不认
+        if (x >= p.cell * blockSize && x < (p.cell + 1) * blockSize) {
+            if (y > touchArea[1]) { // 点在高度界限以下才认
+                hitIndex = _gameBBListIndex;
+            }
+        } else if (p.chordGroup !== undefined) {
+            for (let i = _gameBBListIndex; i < _gameBBList.length; i++) {
+                let cur = _gameBBList[i];
+                if (cur.chordGroup !== p.chordGroup) break;
+                if (cur.hit) continue;
+                if (x >= cur.cell * blockSize && x < (cur.cell + 1) * blockSize && y > touchArea[1]) {
+                    hitIndex = i; break;
+                }
             }
         }
     }
@@ -455,8 +457,8 @@ function gameTapEvent(e) {
         }
         return false;
     } else {
-        // 🌟 防误触：只有开启了垂直判定，且点在了目标方块上方，才豁免死亡
-        if (_fsj) {
+        // 🌟 宽容保护：只有在普通模式下，点到了上方空地才豁免死亡
+        if (!_fsj) {
             let currentCat = document.getElementById(p.id);
             if (currentCat) {
                 let rect = currentCat.getBoundingClientRect();
@@ -466,7 +468,7 @@ function gameTapEvent(e) {
             }
         }
 
-        // 如果没开启垂直判定，或者点得不对，直接 Miss 死亡
+        // 垂直判定模式（或者普通模式下瞎点），直接判定 Miss
         if (!_gameStart) gameStart();
         playAudio("err");
         gameOver();
